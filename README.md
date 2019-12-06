@@ -1,11 +1,13 @@
-# UoM COMP90054 AI Planning for Autonomy - Pacman Project Template
+# pacman-agent
 
-This repository is used by students to fork their own repository to work for the team submission.
+## TODO
+1. Heuristic Search Algorithms (using general or pacman specific heuristic functions)
+2. Classsical Planning (PDDL and calling a classical planner, see subsection)
+3. Policy iteration or Value Iteration (Model-Based MDP)
+4. Monte Carlo Tree Search or UCT (Model-Free MDP)
+5. Reinforcement Learning ¨C classical, approximate or deep Q-learning (Model-Free MDP)
+6. Goal Recognition techniques (to infer intentions of opponents)
+7. Game Theoretic Methods
 
-You must FORK **privately** this repository and change slightly the name to **comp90054-pacman-\<your student number\>**
-
-Read [this documentation about the code of the contest](contest.md)
-
-Please follow the instructions in LMS. An [initial copy of the PDF](instructions.pdf) can be found in this repo.
-
-Hope you enjoy this project!
+## my notes
+1. customize agent for team ```--delay 0.0 -r teams/team_heuristic_search/myTeam.py --redOpts=first=DummyAgent,second=DummyAgent -b teams/team_heuristic_search/myTeam.py```
