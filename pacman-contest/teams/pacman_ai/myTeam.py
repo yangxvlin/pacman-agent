@@ -2,16 +2,14 @@
 Author:      XuLin Yang
 Student id:  904904
 Date:        
-Description: 
+Description:
 """
 
-from captureAgents import CaptureAgent
-import random, time, util
-from game import Directions
-import game
-
 import os
+import random
 import sys
+
+from captureAgents import CaptureAgent
 
 teamName = os.path.split(os.path.dirname(os.path.abspath(__file__)))[1]
 dir = "teams/{}/".format(teamName)
