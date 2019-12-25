@@ -9,6 +9,9 @@
 6. Goal Recognition techniques (to infer intentions of opponents)
 7. Game Theoretic Methods
 
+## coding standards
+- pep8 but with 160 line length limit
+
 ## my notes
 1. customize agent for team ```--delay 0.0 -r teams/team_heuristic_search/myTeam.py --redOpts=first=DummyAgent,second=DummyAgent -b teams/team_heuristic_search/myTeam.py```
 
