@@ -2,7 +2,7 @@
 
 ## TODO
 1. Heuristic Search Algorithms (using general or pacman specific heuristic functions)
-2. Classsical Planning (PDDL and calling a classical planner, see subsection)
+2. Classical Planning (PDDL and calling a classical planner, see subsection)
 3. Policy iteration or Value Iteration (Model-Based MDP)
 4. Monte Carlo Tree Search or UCT (Model-Free MDP)
 5. Reinforcement Learning ¨C classical, approximate or deep Q-learning (Model-Free MDP)
