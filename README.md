@@ -4,7 +4,7 @@
 1. Heuristic Search Algorithms (using general or pacman specific heuristic functions)
     - worth trying
 2. ~~Classical Planning (PDDL and calling a classical planner, see subsection)~~
-    - no need to do this, because it just give a solution not the optimal one
+    - no need to do this, because it just give a solution not the optimal one and I also don't know how to convert current state to pddl in python currently.
     - ff can be downloaded at: https://bitbucket.org/ssardina-teaching/pacman-contest/src/master/planners/
 3. Policy iteration or Value Iteration (Model-Based MDP)
     - value iteration is worse than policy iteration
