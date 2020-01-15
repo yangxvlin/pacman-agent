@@ -2,12 +2,30 @@
 
 ## TODO
 1. Heuristic Search Algorithms (using general or pacman specific heuristic functions)
-2. Classical Planning (PDDL and calling a classical planner, see subsection)
+    - worth trying
+2. ~~Classical Planning (PDDL and calling a classical planner, see subsection)~~
+    - no need to do this, because it just give a solution not the optimal one
 3. Policy iteration or Value Iteration (Model-Based MDP)
+    - value iteration is worse than policy iteration
+        - more memory consumed
+        - longer converge time
+    - worth trying **only if can have function approximation instead of tabular method**
 4. Monte Carlo Tree Search or UCT (Model-Free MDP)
+    - worth trying
 5. Reinforcement Learning ¨C classical, approximate or deep Q-learning (Model-Free MDP)
-6. Goal Recognition techniques (to infer intentions of opponents)
-7. Game Theoretic Methods
+    - ~~classical~~
+        - not as good as approximate in converge time
+    - approximate
+        - **strongly recommended to try**
+    - ~~deep Q-learning~~
+        - as mentioned in the lecture: 
+            1. difficult to implement
+            2. difficult to generate huge amount of data
+6. ~~Goal Recognition techniques (to infer intentions of opponents)~~
+    - lecture 6-2
+    - I can't understand this. And it seems comes together with deep learning. So not gonna try it.
+7. ~~Game Theoretic Methods~~
+    - No idea about how this is related to this project. So not thinking about it currently.
 
 ## coding standards
 - pep8 but with 160 line length limit
