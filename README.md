@@ -5,6 +5,7 @@
     - worth trying
 2. ~~Classical Planning (PDDL and calling a classical planner, see subsection)~~
     - no need to do this, because it just give a solution not the optimal one
+    - ff can be downloaded at: https://bitbucket.org/ssardina-teaching/pacman-contest/src/master/planners/
 3. Policy iteration or Value Iteration (Model-Based MDP)
     - value iteration is worse than policy iteration
         - more memory consumed
