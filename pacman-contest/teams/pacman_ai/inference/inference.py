@@ -170,17 +170,15 @@ class InferenceModule:
                 dist[successorPosition] = prob * (1.0 - mult)
         return dist
 
-    def getPositionDistribution(self, gameState, pos, index=None, agent=None):
+    def getPositionDistribution(self, gameState, pos, opponent_index=None, opponent_agent=None):
         """
         Return a distribution over successor positions of the ghost from the
         given gameState. You must first place the ghost in the gameState, using
         setGhostPosition below.
         """
-        if index == None:
-            index = self.opponent_index - 1
-        if agent == None:
-            agent = self.opponent_agent
-        return self.getPositionDistributionHelper(gameState, pos, index, agent)
+        if opponent_agent is None:
+            opponent_agent = self.opponent_agent
+        return self.getPositionDistributionHelper(gameState, pos, opponent_index, opponent_agent)
 
     def getObservationProb(self, noisyDistance, pacmanPosition, ghostPosition, jailPosition):
         """
