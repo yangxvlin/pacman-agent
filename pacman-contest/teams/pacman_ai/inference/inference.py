@@ -15,7 +15,7 @@
 import game
 import util
 import teams.pacman_ai.utility as utility
-
+from capture import GameState
 
 from util import manhattanDistance, raiseNotDefined
 
@@ -180,28 +180,13 @@ class InferenceModule:
             opponent_agent = self.opponent_agent
         return self.getPositionDistributionHelper(gameState, pos, opponent_index, opponent_agent)
 
-    def getObservationProb(self, noisyDistance, pacmanPosition, ghostPosition, jailPosition):
+    def getObservationProb(self, noisyDistance, pacmanPosition, ghostPosition, game_state: GameState):
         """
         Return the probability P(noisyDistance | pacmanPosition, ghostPosition).
         """
         "*** YOUR CODE HERE ***"
-        # if ghostPosition == jailPosition:
-        #     if noisyDistance is None:
-        #         return 1.0
-        #     else:
-        #         return 0.0
-        # elif noisyDistance is None:
-        #     if ghostPosition == jailPosition:
-        #         return 1.0
-        #     else:
-        #         return 0.0
-        if ghostPosition == jailPosition and noisyDistance is None:
-            return 1.0
-        elif ghostPosition == jailPosition or noisyDistance is None:
-            return 0.0
-
         true_distance = manhattanDistance(pacmanPosition, ghostPosition)
-        return busters.getObservationProbability(noisyDistance, true_distance)
+        return game_state.getDistanceProb(true_distance, noisyDistance)
 
     def set_opponent_position(self, gameState, opponent_position, opponent_index):
         """
