@@ -473,7 +473,7 @@ class JointParticleFilter(ParticleFilter):
         observation = gameState.getAgentDistances()
         self.observeUpdate(observation, gameState)
 
-    def observeUpdate(self, observation, gameState):
+    def observeUpdate(self, observation, gameState: GameState):
         """
         Update beliefs based on the distance observation and Pacman's position.
 
@@ -503,17 +503,16 @@ class JointParticleFilter(ParticleFilter):
             return belief
 
         noisy_distances = observation
-        pacman_position = gameState.getPacmanPosition()
+        self_position = gameState.getAgentPosition(self.self_index)
         new_particles = [[] for _ in range(0, self.numParticles)]
+        opponent_indices = utility.get_opponents_agent_indices(gameState, self.self_index)
 
         for i in range(self.numGhosts):
             belief = get_ghost_belief_distribution(i, self.particles)
-            # print(i, belief)
-            jail_position = self.getJailPosition(i)
-            noisy_distance = noisy_distances[i]
+            noisy_distance = noisy_distances[opponent_indices[i]]
 
             for possible_ghost_position in self.legalPositions:
-                p_noisy_distance_given_true_distance = self.getObservationProb(noisy_distance, pacman_position, possible_ghost_position, jail_position)
+                p_noisy_distance_given_true_distance = self.getObservationProb(noisy_distance, self_position, possible_ghost_position, gameState)
                 belief[possible_ghost_position] *= p_noisy_distance_given_true_distance
             belief.normalize()
             belief_total = belief.total()
