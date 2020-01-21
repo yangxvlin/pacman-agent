@@ -116,13 +116,14 @@ class InferenceModule:
     # Useful methods for all inference modules #
     ############################################
 
-    def __init__(self, opponent_agent):
+    def __init__(self, opponent_agent, self_index):
         """
         Set the ghost agent for later access.
         """
         self.opponent_agent = opponent_agent
         self.opponent_index = opponent_agent.index
         self.obs = []  # most recent observation position
+        self.self_index = self_index
 
     def getPositionDistributionHelper(self, gameState, pos, opponent_index, agent):
         """
@@ -363,7 +364,7 @@ class ParticleFilter(InferenceModule):
         for i in range(0, self.numParticles):
             self.particles.append(self.legalPositions[i % num_legal_positions])
 
-    def observeUpdate(self, observation, gameState):
+    def observeUpdate(self, observation, gameState: GameState):
         """
         Update beliefs based on the distance observation and Pacman's position.
 
@@ -377,12 +378,11 @@ class ParticleFilter(InferenceModule):
         """
         "*** YOUR CODE HERE ***"
         noisy_distance = observation
-        pacman_position = gameState.getPacmanPosition()
-        jail_position = self.getJailPosition()
+        self_position = gameState.getAgentPosition(self.self_index)
 
         belief = self.getBeliefDistribution()
         for possible_ghost_position in self.allPositions:
-            p_noisy_distance_given_true_distance = self.getObservationProb(noisy_distance, pacman_position, possible_ghost_position, jail_position)
+            p_noisy_distance_given_true_distance = self.getObservationProb(noisy_distance, self_position, possible_ghost_position, gameState)
             belief[possible_ghost_position] *= p_noisy_distance_given_true_distance
         belief.normalize()
         belief_total = belief.total()
