@@ -465,15 +465,12 @@ class JointParticleFilter(ParticleFilter):
         """
         self.ghostAgents.append(agent)
 
-    def getJailPosition(self, i):
-        return (2 * i + 1, 1)
-
-    def observe(self, gameState):
+    def observe(self, gameState: GameState):
         """
         Resample the set of particles using the likelihood of the noisy
         observations.
         """
-        observation = gameState.getNoisyGhostDistances()
+        observation = gameState.getAgentDistances()
         self.observeUpdate(observation, gameState)
 
     def observeUpdate(self, observation, gameState):
