@@ -532,6 +532,8 @@ class JointParticleFilter(ParticleFilter):
         Sample each particle's next state based on its current state and the
         gameState.
         """
+        opponent_indices = utility.get_opponents_agent_indices(gameState, self.self_index)
+
         newParticles = []
         for oldParticle in self.particles:
             newParticle = list(oldParticle)  # A list of ghost positions
@@ -539,7 +541,7 @@ class JointParticleFilter(ParticleFilter):
             # now loop through and update each entry in newParticle...
             "*** YOUR CODE HERE ***"
             for i in range(self.numGhosts):
-                newPosDist = self.getPositionDistribution(gameState, oldParticle, i, self.ghostAgents[i])
+                newPosDist = self.getPositionDistribution(gameState, oldParticle, opponent_indices[i], self.ghostAgents[i])
 
                 newParticle[i] = newPosDist.sample()
 
@@ -561,23 +563,20 @@ class MarginalInference(InferenceModule):
         """
         Set the belief state to an initial, prior value.
         """
-        if self.opponent_index == 1:
-            jointInference.initialize(gameState, self.legalPositions)
+        jointInference.initialize(gameState)
         jointInference.addGhostAgent(self.opponent_agent)
 
     def observe(self, gameState):
         """
         Update beliefs based on the given distance observation and gameState.
         """
-        if self.opponent_index == 1:
-            jointInference.observe(gameState)
+        jointInference.observe(gameState)
 
     def elapseTime(self, gameState):
         """
         Predict beliefs for a time step elapsing from a gameState.
         """
-        if self.opponent_index == 1:
-            jointInference.elapseTime(gameState)
+        jointInference.elapseTime(gameState)
 
     def getBeliefDistribution(self):
         """
@@ -587,5 +586,5 @@ class MarginalInference(InferenceModule):
         jointDistribution = jointInference.getBeliefDistribution()
         dist = DiscreteDistribution()
         for t, prob in jointDistribution.items():
-            dist[t[self.opponent_index - 1]] += prob
+            dist[t[self.opponent_index]] += prob
         return dist
