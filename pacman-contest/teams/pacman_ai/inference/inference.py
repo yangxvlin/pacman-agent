@@ -220,9 +220,9 @@ class InferenceModule:
         """
         Collect the relevant noisy distance observation and pass it along.
         """
-        distances = gameState.getNoisyGhostDistances()
+        distances = gameState.getAgentDistances()
         if len(distances) >= self.opponent_index:  # Check for missing observations
-            obs = distances[self.opponent_index - 1]
+            obs = distances[self.opponent_index]
             self.obs = obs
             self.observeUpdate(obs, gameState)
 
