@@ -23,3 +23,16 @@ def get_agents_position(game_state: GameState):
             agents_position[i] = pos
 
     return agents_position
+
+
+def get_opponents_agent_num(game_state: GameState, agent_index):
+    """
+
+    :param game_state:
+    :param agent_index: self agent
+    :return: number of agents in the opponent's team
+    """
+    if game_state.isOnRedTeam(agent_index):
+        return len(game_state.getRedTeamIndices())
+    else:
+        return len(game_state.getBlueTeamIndices())
