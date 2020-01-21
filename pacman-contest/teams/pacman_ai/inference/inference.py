@@ -210,10 +210,11 @@ class InferenceModule:
         """
         Sets the position of all ghosts to the values in ghostPositions.
         """
-        for index, pos in enumerate(ghostPositions):
-            conf = game.Configuration(pos, game.Directions.STOP)
-            gameState.data.agentStates[index + 1] = game.AgentState(conf, False)
-        return gameState
+        raiseNotDefined()
+        # for index, pos in enumerate(ghostPositions):
+        #     conf = game.Configuration(pos, game.Directions.STOP)
+        #     gameState.data.agentStates[index + 1] = game.AgentState(conf, False)
+        # return gameState
 
     def observe(self, gameState):
         """
