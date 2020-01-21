@@ -434,13 +434,13 @@ class JointParticleFilter(ParticleFilter):
     def __init__(self, numParticles=600):
         self.setNumParticles(numParticles)
 
-    def initialize(self, gameState, legalPositions):
+    def initialize(self, gameState: GameState):
         """
         Store information about the game, then initialize particles.
         """
-        self.numGhosts = gameState.getNumAgents() - 1
+        self.numGhosts = utility.get_opponents_agent_num(gameState, self.self_index)
         self.ghostAgents = []
-        self.legalPositions = legalPositions
+        super().initialize(gameState)
         self.initializeUniformly(gameState)
 
     def initializeUniformly(self, gameState):
