@@ -8,7 +8,7 @@ Description: some helper functions
 from capture import GameState
 
 
-def get_agents_position(game_state: GameState):
+def get_agents_position(game_state: GameState, self_index):
     """
 
     :param game_state:
@@ -16,7 +16,7 @@ def get_agents_position(game_state: GameState):
     """
     agents_position = {}
 
-    for i in range(0, game_state.getNumAgents()):
+    for i in get_self_agent_indices(game_state, self_index):
         pos = game_state.getAgentPosition(i)
 
         if pos:
@@ -49,3 +49,16 @@ def get_opponents_agent_indices(game_state: GameState, agent_index):
         return game_state.getBlueTeamIndices()
     else:
         return game_state.getRedTeamIndices()
+
+
+def get_self_agent_indices(game_state: GameState, agent_index):
+    """
+
+    :param game_state:
+    :param agent_index: self agent
+    :return: number of agents in the self team
+    """
+    if game_state.isOnRedTeam(agent_index):
+        return game_state.getRedTeamIndices()
+    else:
+        return game_state.getBlueTeamIndices()
