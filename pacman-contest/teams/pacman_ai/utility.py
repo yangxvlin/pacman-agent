@@ -33,9 +33,9 @@ def get_opponents_agent_num(game_state: GameState, agent_index):
     :return: number of agents in the opponent's team
     """
     if game_state.isOnRedTeam(agent_index):
-        return len(game_state.getRedTeamIndices())
-    else:
         return len(game_state.getBlueTeamIndices())
+    else:
+        return len(game_state.getRedTeamIndices())
 
 
 def get_opponents_agent_indices(game_state: GameState, agent_index):
@@ -46,6 +46,6 @@ def get_opponents_agent_indices(game_state: GameState, agent_index):
     :return: number of agents in the opponent's team
     """
     if game_state.isOnRedTeam(agent_index):
-        return game_state.getRedTeamIndices()
-    else:
         return game_state.getBlueTeamIndices()
+    else:
+        return game_state.getRedTeamIndices()
