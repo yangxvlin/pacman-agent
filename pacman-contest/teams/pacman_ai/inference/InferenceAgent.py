@@ -32,8 +32,8 @@ class InferenceAgent(CaptureAgent):
 
         self.game_state = gameState
 
-        opponent_agent_indices = utility.get_opponents_agent_indices(self.game_state, self.index)
-        ghostAgents = [RandomGhost(index) for index in opponent_agent_indices]
+        self.opponent_agent_indices = utility.get_opponents_agent_indices(self.game_state, self.index)
+        ghostAgents = [RandomGhost(index) for index in self.opponent_agent_indices]
         self.inferenceModules = [self.inferenceType(a) for a in ghostAgents]
 
         import __main__
@@ -46,7 +46,7 @@ class InferenceAgent(CaptureAgent):
     def observationFunction(self, gameState):
         "Removes the ghost states from the gameState"
         agents = gameState.data.agentStates
-        gameState.data.agentStates = [agents[0]] + [None for i in range(1, len(agents))]
+        gameState.data.agentStates = [None if i in self.opponent_agent_indices else agents[i] for i in range(0, len(agents))]
         return gameState
 
     def getAction(self, gameState):
