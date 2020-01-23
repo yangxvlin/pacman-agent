@@ -12,6 +12,7 @@ import sys
 from captureAgents import CaptureAgent
 # Although it seems unused, it is required when we want to call it from command line
 from teams.pacman_ai.search import SearchAgent
+from teams.pacman_ai.inference.InferenceAgent import InferenceAgent
 
 teamName = os.path.split(os.path.dirname(os.path.abspath(__file__)))[1]
 dir = "teams/{}/".format(teamName)

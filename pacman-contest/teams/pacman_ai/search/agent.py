@@ -62,9 +62,9 @@ class SearchAgent(CaptureAgent):
         You should change this in your own agent.
         '''
 
-        # for i in range(0, 4):
-        #     print(i, gameState.getAgentState(i))
-        # print(self.index, gameState.agentDistances)
-        print(gameState.data.agentStates[0].configuration.getPosition())
+        for i in range(0, 4):
+            print(i, gameState.getAgentState(i))
+        print("self.index", self.index, gameState.agentDistances)
+        # print(gameState.data.agentStates[0].configuration.getPosition())
         return random.choice(actions)
 
