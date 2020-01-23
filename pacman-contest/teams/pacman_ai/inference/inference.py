@@ -135,12 +135,12 @@ class InferenceModule:
         :return:
         """
         # set position to be inferred for opponent
-        print(gameState.data.agentStates[opponent_index])
+        # print(gameState.data.agentStates[opponent_index])
         try:
             gameState = self.set_opponent_position(gameState, pos, opponent_index)
         except TypeError:
             gameState = self.set_opponent_positions(gameState, pos)
-        print(gameState.data.agentStates[opponent_index])
+        # print(gameState.data.agentStates[opponent_index])
 
         self_positions = utility.get_agents_position(gameState, self.self_index)
         opponent_position = pos# gameState.getAgentPosition(opponent_index)  # The position you set
@@ -161,7 +161,7 @@ class InferenceModule:
 
         # distribution for the agent's action behavior.
         # Probably, I will just uniform distribution(ghostAgents.RandomGhost) for the opponent's agent for simplicity.
-        print("opponent_index", opponent_index)
+        # print("opponent_index", opponent_index)
         actionDist = agent.getDistribution(gameState)
 
         for action, prob in actionDist.items():
@@ -411,7 +411,10 @@ class ParticleFilter(InferenceModule):
         for position in self.allPositions:
             new_position_distribution_dictionary[position] = self.getPositionDistribution(gameState, position, self.opponent_index, self.opponent_agent)
 
+        # TODO a headache bug here
+        print("elapseTime", new_position_distribution_dictionary.keys())
         for i, old_particle in enumerate(self.particles):
+            print(old_particle, old_particle in self.allPositions, old_particle in self.legalPositions, gameState.hasWall(int(old_particle[0]), int(old_particle[1])))
             self.particles[i] = new_position_distribution_dictionary[old_particle].sample()
 
     def getBeliefDistribution(self):
@@ -479,9 +482,10 @@ class JointParticleFilter(ParticleFilter):
         """
         # print("debug", self.self_index, gameState.redTeam)
         observation = gameState.getAgentDistances()
+        print("JointParticleFilter.observe", observation)
 
-        if not observation:
-            raiseNotDefined()
+        # if not observation:
+        #     return
 
         self.observeUpdate(observation, gameState)
 

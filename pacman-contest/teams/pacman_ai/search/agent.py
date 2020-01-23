@@ -8,6 +8,8 @@ Description: contains agent for "Heuristic Search Algorithms (using general or p
 from captureAgents import CaptureAgent
 import random
 
+from game import Directions
+
 
 class SearchAgent(CaptureAgent):
     """
@@ -62,9 +64,10 @@ class SearchAgent(CaptureAgent):
         You should change this in your own agent.
         '''
 
-        for i in range(0, 4):
-            print(i, gameState.getAgentState(i))
-        print("self.index", self.index, gameState.agentDistances)
+        # for i in range(0, 4):
+        #     print(i, gameState.getAgentState(i))
+        # print("SearchAgent: self.index=", self.index, gameState.agentDistances)
         # print(gameState.data.agentStates[0].configuration.getPosition())
-        return random.choice(actions)
+        return Directions.STOP
+        # return random.choice(actions)
 
