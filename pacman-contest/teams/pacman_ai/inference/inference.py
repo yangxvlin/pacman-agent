@@ -441,141 +441,141 @@ class ParticleFilter(InferenceModule):
         return belief
 
 
-class JointParticleFilter(ParticleFilter):
-    """
-    JointParticleFilter tracks a joint distribution over tuples of all ghost positions.
-    """
-    def __init__(self, opponent_agent, self_index, numParticles=600):
-        super().__init__(opponent_agent, self_index, numParticles)
-        self.setNumParticles(numParticles)
-
-    def initialize(self, gameState: GameState):
-        """
-        Store information about the game, then initialize particles.
-        """
-        self.numGhosts = utility.get_opponents_agent_num(gameState, self.self_index)
-        self.ghostAgents = []
-        super().initialize(gameState)
-        self.initializeUniformly(gameState)
-
-    def initializeUniformly(self, gameState):
-        """
-        Initialize particles to be consistent with a uniform prior. Particles
-        should be evenly distributed across positions in order to ensure a
-        uniform prior.
-        """
-        self.particles = []
-        "*** YOUR CODE HERE ***"
-        num_legal_positions = len(self.legalPositions)
-        for i in range(0, self.numParticles):
-            ghosts_position_sample = []
-            for _ in range(0, self.numGhosts):
-                ghosts_position_sample.append(self.legalPositions[i % num_legal_positions])
-            self.particles.append(tuple(ghosts_position_sample))
-
-    def addGhostAgent(self, agent):
-        """
-        Each ghost agent is registered separately and stored (in case they are
-        different).
-        """
-        # print("JointParticleFilter.addGhostAgent", agent.index)
-        self.ghostAgents.append(agent)
-
-    def observe(self, gameState: GameState):
-        """
-        Resample the set of particles using the likelihood of the noisy
-        observations.
-        """
-        # print("debug", self.self_index, gameState.redTeam)
-        observation = gameState.getAgentDistances()
-        # print("JointParticleFilter.observe", observation)
-
-        # if not observation:
-        #     return
-
-        self.observeUpdate(observation, gameState)
-
-    def observeUpdate(self, observation, gameState: GameState):
-        """
-        Update beliefs based on the distance observation and Pacman's position.
-
-        The observation is the noisy Manhattan distances to all ghosts you
-        are tracking.
-
-        There is one special case that a correct implementation must handle.
-        When all particles receive zero weight, the list of particles should
-        be reinitialized by calling initializeUniformly. The total method of
-        the DiscreteDistribution may be useful.
-        """
-        "*** YOUR CODE HERE ***"
-        def get_ghost_belief_distribution(ghost_index, particles):
-            """
-            Return the agent's current belief state, a distribution over ghost_i
-            locations conditioned on all evidence and time passage. This method
-            essentially converts a list of particles into a belief distribution.
-
-            This function should return a normalized distribution.
-            """
-            belief = DiscreteDistribution()
-
-            for particle in particles:
-                belief[particle[ghost_index]] += 1
-
-            belief.normalize()
-            return belief
-
-        noisy_distances = observation
-        # print(self.self_index)
-        # print(self.opponent_index)
-        self_position = gameState.getAgentPosition(self.self_index)
-        new_particles = [[] for _ in range(0, self.numParticles)]
-        opponent_indices = utility.get_opponents_agent_indices(gameState, self.self_index)
-
-        for i in range(self.numGhosts):
-            belief = get_ghost_belief_distribution(i, self.particles)
-            # print(i, opponent_indices, noisy_distances)
-            noisy_distance = noisy_distances[opponent_indices[i]]
-
-            for possible_ghost_position in self.legalPositions:
-                p_noisy_distance_given_true_distance = self.getObservationProb(noisy_distance, self_position, possible_ghost_position, gameState)
-                belief[possible_ghost_position] *= p_noisy_distance_given_true_distance
-            belief.normalize()
-            belief_total = belief.total()
-
-            if belief_total == 0:
-                self.initializeUniformly(gameState)
-                return
-            else:
-                for m in range(0, self.numParticles):
-                    sample = belief.sample()
-                    new_particles[m].append(sample)
-
-        self.particles = list(map(lambda x: tuple(x), new_particles))
-
-    def elapseTime(self, gameState):
-        # TODO there is a bug I don't know how to solve now. So I just skip this method.
-        return
-        """
-        Sample each particle's next state based on its current state and the
-        gameState.
-        """
-        opponent_indices = utility.get_opponents_agent_indices(gameState, self.self_index)
-
-        newParticles = []
-        for oldParticle in self.particles:
-            newParticle = list(oldParticle)  # A list of ghost positions
-
-            # now loop through and update each entry in newParticle...
-            "*** YOUR CODE HERE ***"
-            for i in range(self.numGhosts):
-                # print("JointParticleFilter.elapseTime", i, opponent_indices, gameState.getAgentState(opponent_indices[i]), self.ghostAgents)
-                newPosDist = self.getPositionDistribution(gameState, oldParticle, opponent_indices[i], self.ghostAgents[i])
-
-                newParticle[i] = newPosDist.sample()
-
-            """*** END YOUR CODE HERE ***"""
-            newParticles.append(tuple(newParticle))
-        self.particles = newParticles
+# class JointParticleFilter(ParticleFilter):
+#     """
+#     JointParticleFilter tracks a joint distribution over tuples of all ghost positions.
+#     """
+#     def __init__(self, opponent_agent, self_index, numParticles=600):
+#         super().__init__(opponent_agent, self_index, numParticles)
+#         self.setNumParticles(numParticles)
+#
+#     def initialize(self, gameState: GameState):
+#         """
+#         Store information about the game, then initialize particles.
+#         """
+#         self.numGhosts = utility.get_opponents_agent_num(gameState, self.self_index)
+#         self.ghostAgents = []
+#         super().initialize(gameState)
+#         self.initializeUniformly(gameState)
+#
+#     def initializeUniformly(self, gameState):
+#         """
+#         Initialize particles to be consistent with a uniform prior. Particles
+#         should be evenly distributed across positions in order to ensure a
+#         uniform prior.
+#         """
+#         self.particles = []
+#         "*** YOUR CODE HERE ***"
+#         num_legal_positions = len(self.legalPositions)
+#         for i in range(0, self.numParticles):
+#             ghosts_position_sample = []
+#             for _ in range(0, self.numGhosts):
+#                 ghosts_position_sample.append(self.legalPositions[i % num_legal_positions])
+#             self.particles.append(tuple(ghosts_position_sample))
+#
+#     def addGhostAgent(self, agent):
+#         """
+#         Each ghost agent is registered separately and stored (in case they are
+#         different).
+#         """
+#         # print("JointParticleFilter.addGhostAgent", agent.index)
+#         self.ghostAgents.append(agent)
+#
+#     def observe(self, gameState: GameState):
+#         """
+#         Resample the set of particles using the likelihood of the noisy
+#         observations.
+#         """
+#         # print("debug", self.self_index, gameState.redTeam)
+#         observation = gameState.getAgentDistances()
+#         # print("JointParticleFilter.observe", observation)
+#
+#         # if not observation:
+#         #     return
+#
+#         self.observeUpdate(observation, gameState)
+#
+#     def observeUpdate(self, observation, gameState: GameState):
+#         """
+#         Update beliefs based on the distance observation and Pacman's position.
+#
+#         The observation is the noisy Manhattan distances to all ghosts you
+#         are tracking.
+#
+#         There is one special case that a correct implementation must handle.
+#         When all particles receive zero weight, the list of particles should
+#         be reinitialized by calling initializeUniformly. The total method of
+#         the DiscreteDistribution may be useful.
+#         """
+#         "*** YOUR CODE HERE ***"
+#         def get_ghost_belief_distribution(ghost_index, particles):
+#             """
+#             Return the agent's current belief state, a distribution over ghost_i
+#             locations conditioned on all evidence and time passage. This method
+#             essentially converts a list of particles into a belief distribution.
+#
+#             This function should return a normalized distribution.
+#             """
+#             belief = DiscreteDistribution()
+#
+#             for particle in particles:
+#                 belief[particle[ghost_index]] += 1
+#
+#             belief.normalize()
+#             return belief
+#
+#         noisy_distances = observation
+#         # print(self.self_index)
+#         # print(self.opponent_index)
+#         self_position = gameState.getAgentPosition(self.self_index)
+#         new_particles = [[] for _ in range(0, self.numParticles)]
+#         opponent_indices = utility.get_opponents_agent_indices(gameState, self.self_index)
+#
+#         for i in range(self.numGhosts):
+#             belief = get_ghost_belief_distribution(i, self.particles)
+#             # print(i, opponent_indices, noisy_distances)
+#             noisy_distance = noisy_distances[opponent_indices[i]]
+#
+#             for possible_ghost_position in self.legalPositions:
+#                 p_noisy_distance_given_true_distance = self.getObservationProb(noisy_distance, self_position, possible_ghost_position, gameState)
+#                 belief[possible_ghost_position] *= p_noisy_distance_given_true_distance
+#             belief.normalize()
+#             belief_total = belief.total()
+#
+#             if belief_total == 0:
+#                 self.initializeUniformly(gameState)
+#                 return
+#             else:
+#                 for m in range(0, self.numParticles):
+#                     sample = belief.sample()
+#                     new_particles[m].append(sample)
+#
+#         self.particles = list(map(lambda x: tuple(x), new_particles))
+#
+#     def elapseTime(self, gameState):
+#         # TODO there is a bug I don't know how to solve now. So I just skip this method.
+#         return
+#         """
+#         Sample each particle's next state based on its current state and the
+#         gameState.
+#         """
+#         opponent_indices = utility.get_opponents_agent_indices(gameState, self.self_index)
+#
+#         newParticles = []
+#         for oldParticle in self.particles:
+#             newParticle = list(oldParticle)  # A list of ghost positions
+#
+#             # now loop through and update each entry in newParticle...
+#             "*** YOUR CODE HERE ***"
+#             for i in range(self.numGhosts):
+#                 # print("JointParticleFilter.elapseTime", i, opponent_indices, gameState.getAgentState(opponent_indices[i]), self.ghostAgents)
+#                 newPosDist = self.getPositionDistribution(gameState, oldParticle, opponent_indices[i], self.ghostAgents[i])
+#
+#                 newParticle[i] = newPosDist.sample()
+#
+#             """*** END YOUR CODE HERE ***"""
+#             newParticles.append(tuple(newParticle))
+#         self.particles = newParticles
 
 
 # One JointInference module is shared globally across instances of MarginalInference
