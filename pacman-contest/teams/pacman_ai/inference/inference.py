@@ -166,6 +166,8 @@ class InferenceModule:
 
         for action, prob in actionDist.items():
             successorPosition = game.Actions.getSuccessor(opponent_position, action)
+            if successorPosition not in self.allPositions:
+                print("getPositionDistributionHelper", successorPosition, opponent_position, action)
             if successorPosition in self_successor_positions:  # Ghost could get caught
                 denom = float(len(actionDist))
                 dist[gameState.getInitialAgentPosition(opponent_index)] += prob * (1.0 / denom) * (1.0 - mult)
@@ -237,7 +239,7 @@ class InferenceModule:
         """
         Initialize beliefs to a uniform distribution over all legal positions.
         """
-        self.legalPositions = [p for p in gameState.getWalls().asList(False) if p[1] > 1]
+        self.legalPositions = [p for p in gameState.getWalls().asList(False)]
         self.allPositions = self.legalPositions
         self.initializeUniformly(gameState)
 
@@ -399,6 +401,8 @@ class ParticleFilter(InferenceModule):
             self.particles.clear()
             for _ in range(0, self.numParticles):
                 sample = belief.sample()
+                # if sample not in self.allPositions:
+                #     print("observeUpdate", sample, sample in self.allPositions, belief)
                 self.particles.append(sample)
 
     def elapseTime(self, gameState):
@@ -411,11 +415,13 @@ class ParticleFilter(InferenceModule):
         for position in self.allPositions:
             new_position_distribution_dictionary[position] = self.getPositionDistribution(gameState, position, self.opponent_index, self.opponent_agent)
 
-        # TODO a headache bug here
-        print("elapseTime", new_position_distribution_dictionary.keys())
+        # print("elapseTime", new_position_distribution_dictionary.keys())
+        # print(self.particles)
         for i, old_particle in enumerate(self.particles):
-            print(old_particle, old_particle in self.allPositions, old_particle in self.legalPositions, gameState.hasWall(int(old_particle[0]), int(old_particle[1])))
-            self.particles[i] = new_position_distribution_dictionary[old_particle].sample()
+            # print(old_particle, old_particle in self.allPositions, old_particle in self.legalPositions, gameState.hasWall(int(old_particle[0]), int(old_particle[1])))
+            sample = new_position_distribution_dictionary[old_particle].sample()
+            # print("{} sampled to {}".format(str(old_particle), str(sample)), sample in self.allPositions, new_position_distribution_dictionary[old_particle])
+            self.particles[i] = sample
 
     def getBeliefDistribution(self):
         """
@@ -472,7 +478,7 @@ class JointParticleFilter(ParticleFilter):
         Each ghost agent is registered separately and stored (in case they are
         different).
         """
-        print("JointParticleFilter.addGhostAgent", agent.index)
+        # print("JointParticleFilter.addGhostAgent", agent.index)
         self.ghostAgents.append(agent)
 
     def observe(self, gameState: GameState):
@@ -482,7 +488,7 @@ class JointParticleFilter(ParticleFilter):
         """
         # print("debug", self.self_index, gameState.redTeam)
         observation = gameState.getAgentDistances()
-        print("JointParticleFilter.observe", observation)
+        # print("JointParticleFilter.observe", observation)
 
         # if not observation:
         #     return
@@ -562,7 +568,7 @@ class JointParticleFilter(ParticleFilter):
             # now loop through and update each entry in newParticle...
             "*** YOUR CODE HERE ***"
             for i in range(self.numGhosts):
-                print("JointParticleFilter.elapseTime", i, opponent_indices, gameState.getAgentState(opponent_indices[i]), self.ghostAgents)
+                # print("JointParticleFilter.elapseTime", i, opponent_indices, gameState.getAgentState(opponent_indices[i]), self.ghostAgents)
                 newPosDist = self.getPositionDistribution(gameState, oldParticle, opponent_indices[i], self.ghostAgents[i])
 
                 newParticle[i] = newPosDist.sample()
