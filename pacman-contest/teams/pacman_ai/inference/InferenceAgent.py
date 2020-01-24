@@ -23,13 +23,13 @@ class InferenceAgent(CaptureAgent):
         # self.index = index
         self.game_state = None
 
-        # try:
-        #     self.inferenceType = util.lookup(inference, globals())
-        # except Exception:
-        #     self.inferenceType = util.lookup('inference.' + inference, globals())
+        try:
+            self.inferenceType = util.lookup(inference, globals())
+        except Exception:
+            self.inferenceType = util.lookup('inference.' + inference, globals())
         # self.inferenceType = JointParticleFilter
         # self.inferenceType = ParticleFilter
-        self.inferenceType = ExactInference
+        # self.inferenceType = ExactInference
 
         self.observeEnable = observeEnable
         self.elapseTimeEnable = elapseTimeEnable
