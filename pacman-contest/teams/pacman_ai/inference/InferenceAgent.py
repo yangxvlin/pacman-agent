@@ -11,7 +11,7 @@ from capture import Directions
 import util
 import teams.pacman_ai.utility as utility
 from ghostAgents import RandomGhost
-from teams.pacman_ai.inference.inference import JointParticleFilter, ParticleFilter
+from teams.pacman_ai.inference.inference import ParticleFilter, ExactInference
 from capture import GameState
 
 
@@ -28,7 +28,8 @@ class InferenceAgent(CaptureAgent):
         # except Exception:
         #     self.inferenceType = util.lookup('inference.' + inference, globals())
         # self.inferenceType = JointParticleFilter
-        self.inferenceType = ParticleFilter
+        # self.inferenceType = ParticleFilter
+        self.inferenceType = ExactInference
 
         self.observeEnable = observeEnable
         self.elapseTimeEnable = elapseTimeEnable

@@ -273,77 +273,67 @@ class InferenceModule:
         raise NotImplementedError
 
 
-# class ExactInference(InferenceModule):
-#     """
-#     The exact dynamic inference module should use forward algorithm updates to
-#     compute the exact belief function at each time step.
-#     """
-#     def initializeUniformly(self, gameState):
-#         """
-#         Begin with a uniform distribution over legal ghost positions (i.e., not
-#         including the jail position).
-#         """
-#         self.beliefs = DiscreteDistribution()
-#         for p in self.legalPositions:
-#             self.beliefs[p] = 1.0
-#         self.beliefs.normalize()
-#
-#     def observeUpdate(self, observation, gameState):
-#         """
-#         Update beliefs based on the distance observation and Pacman's position.
-#
-#         The observation is the noisy Manhattan distance to the ghost you are
-#         tracking.
-#
-#         self.allPositions is a list of the possible ghost positions, including
-#         the jail position. You should only consider positions that are in
-#         self.allPositions.
-#
-#         The update model is not entirely stationary: it may depend on Pacman's
-#         current position. However, this is not a problem, as Pacman's current
-#         position is known.
-#         """
-#         "*** YOUR CODE HERE ***"
-#         noisy_distance = observation
-#         pacman_position = gameState.getPacmanPosition()
-#         jail_position = self.getJailPosition()
-#
-#         for possible_ghost_position in self.beliefs:
-#             p_noisy_distance_given_true_distance = self.getObservationProb(noisy_distance, pacman_position, possible_ghost_position, jail_position)
-#             self.beliefs[possible_ghost_position] *= p_noisy_distance_given_true_distance
-#
-#         self.beliefs.normalize()
-#
-#     def elapseTime(self, gameState):
-#         """
-#         Predict beliefs in response to a time step passing from the current
-#         state.
-#
-#         The transition model is not entirely stationary: it may depend on
-#         Pacman's current position. However, this is not a problem, as Pacman's
-#         current position is known.
-#         """
-#         "*** YOUR CODE HERE ***"
-#         pacman_position = gameState.getPacmanPosition()
-#
-#         new_beliefs = DiscreteDistribution()
-#
-#         new_position_distribution_dictionary = {}
-#         for position in self.allPositions:
-#             new_position_distribution_dictionary[position] = self.getPositionDistribution(gameState, position)
-#
-#         for newPos in self.allPositions:
-#             new_beliefs[newPos] = 0.0
-#
-#             for oldPos in self.allPositions:
-#                 newPosDist = new_position_distribution_dictionary[oldPos]
-#                 new_beliefs[newPos] += newPosDist[newPos] * self.beliefs[oldPos]
-#
-#         new_beliefs.normalize()
-#         self.beliefs = new_beliefs
-#
-#     def getBeliefDistribution(self):
-#         return self.beliefs
+class ExactInference(InferenceModule):
+    """
+    The exact dynamic inference module should use forward algorithm updates to compute the exact belief function at each time step.
+    """
+    def initializeUniformly(self, gameState):
+        """
+        Begin with a uniform distribution over legal ghost positions (i.e., not including the jail position).
+        """
+        self.beliefs = DiscreteDistribution()
+        for p in self.legalPositions:
+            self.beliefs[p] = 1.0
+        self.beliefs.normalize()
+
+    def observeUpdate(self, observation, gameState: GameState):
+        """
+        Update beliefs based on the distance observation and Pacman's position.
+
+        The observation is the noisy Manhattan distance to the ghost you are tracking.
+
+        self.allPositions is a list of the possible ghost positions, including the jail position. You should only consider positions that are in self.allPositions.
+
+        The update model is not entirely stationary: it may depend on Pacman's current position. However, this is not a problem, as Pacman's current position is known.
+        """
+        "*** YOUR CODE HERE ***"
+        noisy_distance = observation
+        self_position = gameState.getAgentPosition(self.self_index)
+
+        for possible_ghost_position in self.beliefs:
+            p_noisy_distance_given_true_distance = self.getObservationProb(noisy_distance, self_position, possible_ghost_position, gameState)
+            self.beliefs[possible_ghost_position] *= p_noisy_distance_given_true_distance
+
+        self.beliefs.normalize()
+
+    def elapseTime(self, gameState: GameState):
+        """
+        Predict beliefs in response to a time step passing from the current state.
+
+        The transition model is not entirely stationary: it may depend on Pacman's current position. However, this is not a problem, as Pacman's
+        current position is known.
+        """
+        "*** YOUR CODE HERE ***"
+        self_position = gameState.getAgentPosition(self.self_index)
+
+        new_beliefs = DiscreteDistribution()
+
+        new_position_distribution_dictionary = {}
+        for position in self.allPositions:
+            new_position_distribution_dictionary[position] = self.getPositionDistribution(gameState, position, self.opponent_index, self.opponent_agent)
+
+        for newPos in self.allPositions:
+            new_beliefs[newPos] = 0.0
+
+            for oldPos in self.allPositions:
+                newPosDist = new_position_distribution_dictionary[oldPos]
+                new_beliefs[newPos] += newPosDist[newPos] * self.beliefs[oldPos]
+
+        new_beliefs.normalize()
+        self.beliefs = new_beliefs
+
+    def getBeliefDistribution(self):
+        return self.beliefs
 
 
 class ParticleFilter(InferenceModule):
