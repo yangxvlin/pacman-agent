@@ -454,6 +454,7 @@ class AgentRules:
     Returns a list of legal actions (which are both possible & allowed)
     """
     agentState = state.getAgentState(agentIndex)
+    # print("getLegalActions", agentIndex, state is None, agentState)
     conf = agentState.configuration
     possibleActions = Actions.getPossibleActions( conf, state.data.layout.walls )
     return AgentRules.filterForAllowedActions( agentState, possibleActions)
