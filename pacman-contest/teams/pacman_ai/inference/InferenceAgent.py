@@ -28,7 +28,7 @@ class InferenceAgent(CaptureAgent):
         except Exception:
             self.inferenceType = util.lookup('inference.' + inference, globals())
         # self.inferenceType = JointParticleFilter
-        # self.inferenceType = ParticleFilter
+        self.inferenceType = ParticleFilter
         # self.inferenceType = ExactInference
 
         self.observeEnable = observeEnable
@@ -67,6 +67,9 @@ class InferenceAgent(CaptureAgent):
         # for i in range(0, 4):
         #     print(gameState.isOnRedTeam(i), gameState.data.agentStates[i])
         # print("InferenceAgent.getAction", gameState.getAgentDistances())
+        print(gameState.getAgentDistances())
+        for i in range(0, 4):
+            print(i, gameState.getAgentState(i))
 
         for index, inf in enumerate(self.inferenceModules):
             # print("InferenceAgent.getAction", index, not self.firstMove and self.elapseTimeEnable)
@@ -84,6 +87,19 @@ class InferenceAgent(CaptureAgent):
         self.display.updateDistributions(self.ghostBeliefs)
         return self.chooseAction(gameState)
 
+    # def observationFunction(self, gameState: GameState):
+    #     return self.makeObservation(gameState, self.index)
+    #
+    # def makeObservation(self, game_state: GameState, index):
+    #     state = game_state.deepCopy()
+    #
+    #     pos = state.getAgentPosition(index)
+    #     n = state.getNumAgents()
+    #     distances = [util.manhattanDistance(pos, state.getAgentPosition(i)) for i in range(n)]
+    #     state.agentDistances = distances
+    #
+    #     return state
+
     def chooseAction(self, gameState):
         "By default, a BustersAgent just stops.  This should be overridden."
         # print("InferenceAgent.chooseAction", gameState.getAgentDistances())
@@ -94,6 +110,7 @@ class InferenceAgent(CaptureAgent):
         # You should change this in your own agent.
         # '''
         #
+        # print(gameState.getAgentDistances())
         # for i in range(0, 4):
         #     print(i, gameState.getAgentState(i))
         # print("InferenceAgent: self.index=", self.index, gameState.agentDistances)
