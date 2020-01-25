@@ -5,20 +5,17 @@ Date:        2020-1-16 14:48:56
 Description: contains agent for "Heuristic Search Algorithms (using general or pacman specific heuristic functions)"
 """
 
-from captureAgents import CaptureAgent
+from teams.pacman_ai.omniscient.OmniscientAgent import OmniscientAgent
 import random
 
-from game import Directions
 
-
-class SearchAgent(CaptureAgent):
+class SearchAgent(OmniscientAgent):
     """
     A Search agent:
     """
 
     def __init__(self, index, timeForComputing=.1):
-        super().__init__(index, timeForComputing=.1)
-        self.game_state = None
+        super().__init__(index, timeForComputing)
 
     def registerInitialState(self, gameState):
         """
@@ -35,7 +32,7 @@ class SearchAgent(CaptureAgent):
         on initialization time, please take a look at
         CaptureAgent.registerInitialState in captureAgents.py.
         '''
-        CaptureAgent.registerInitialState(self, gameState)
+        super().registerInitialState(gameState)
 
         '''
         Your initialization code goes here, if you need any.
@@ -64,10 +61,10 @@ class SearchAgent(CaptureAgent):
         You should change this in your own agent.
         '''
 
-        # for i in range(0, 4):
-        #     print(i, gameState.getAgentState(i))
+        for i in range(0, 4):
+            print(i, gameState.getAgentState(i))
         # print("SearchAgent: self.index=", self.index, gameState.agentDistances)
         # print(gameState.data.agentStates[0].configuration.getPosition())
-        return Directions.STOP
-        # return random.choice(actions)
+        # return Directions.STOP
+        return random.choice(actions)
 
