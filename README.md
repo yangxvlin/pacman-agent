@@ -33,6 +33,8 @@
 
 ## my notes
 1. customize agent for team ```--delay 0.0 -r teams/team_heuristic_search/myTeam.py --redOpts=first=DummyAgent,second=DummyAgent -b teams/team_heuristic_search/myTeam.py```
+2. A distanceCalculator instance caches the maze distances between each pair of positions, so your agents can use:
+    ```self.distancer.getDistance(p1, p2)```
 
 ### --help
 ```

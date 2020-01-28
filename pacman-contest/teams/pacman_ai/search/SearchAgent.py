@@ -8,6 +8,7 @@ Description: contains agent for "Heuristic Search Algorithms (using general or p
 from teams.pacman_ai.omniscient.OmniscientAgent import OmniscientAgent
 import random
 from capture import GameState
+from captureAgents import CaptureAgent
 import teams.pacman_ai.utility as utility
 
 class SearchAgent(OmniscientAgent):
@@ -70,7 +71,7 @@ class SearchAgent(OmniscientAgent):
         return random.choice(actions)
 
 
-def alpha_beta(node: GameState, alpha, beta, evaluation_functions, current_player_index, depth=4):
+def alpha_beta(node: GameState, alpha, beta, evaluation_functions, current_player_index, team_indices, search_agent: CaptureAgent, depth=4):
     """
     modify from page 16: https://project.dke.maastrichtuniversity.nl/games/files/phd/Nijssen_thesis.pdf
     :param node: game state
@@ -78,11 +79,16 @@ def alpha_beta(node: GameState, alpha, beta, evaluation_functions, current_playe
     :param beta: beta value
     :param evaluation_functions: {index: function} pair
     :param current_player_index: the playing player index
+    :param team_indices: the agents' indices in one team
+    :param search_agent: CaptureAgent object. used for calculating distance
     :param depth: depth cut-off
     :return: (action, evaluate score) pair
     """
     if node.isOver() or depth <= 0:
-        return None, evaluation_functions[current_player_index](node, current_player_index)
+        if current_player_index in team_indices:
+            return None, evaluation_functions[current_player_index](node, current_player_index, search_agent)
+        else:
+            return None, -evaluation_functions[current_player_index](node, current_player_index, search_agent)
 
     next_action = None
 
@@ -90,9 +96,11 @@ def alpha_beta(node: GameState, alpha, beta, evaluation_functions, current_playe
     for action in node.getLegalActions(current_player_index):
         next_node = node.generateSuccessor(current_player_index, action)
 
-        _, new_alpha = -alpha_beta(next_node, -beta, -alpha, evaluation_functions, next_player_index, depth-1)
-        if new_alpha > alpha:
-            alpha = new_alpha
+        _, v = alpha_beta(next_node, -beta, -alpha, evaluation_functions, next_player_index, team_indices, search_agent, depth-1)
+        v *= -1
+
+        if v > alpha:
+            alpha = v
             next_action = action
 
         if alpha >= beta:
