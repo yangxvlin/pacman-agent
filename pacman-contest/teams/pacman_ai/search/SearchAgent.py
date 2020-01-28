@@ -7,7 +7,8 @@ Description: contains agent for "Heuristic Search Algorithms (using general or p
 
 from teams.pacman_ai.omniscient.OmniscientAgent import OmniscientAgent
 import random
-
+from capture import GameState
+import teams.pacman_ai.utility as utility
 
 class SearchAgent(OmniscientAgent):
     """
@@ -68,3 +69,33 @@ class SearchAgent(OmniscientAgent):
         # return Directions.STOP
         return random.choice(actions)
 
+
+def alpha_beta(node: GameState, alpha, beta, evaluation_functions, current_player_index, depth=4):
+    """
+    modify from page 16: https://project.dke.maastrichtuniversity.nl/games/files/phd/Nijssen_thesis.pdf
+    :param node: game state
+    :param alpha: alpha value
+    :param beta: beta value
+    :param evaluation_functions: {index: function} pair
+    :param current_player_index: the playing player index
+    :param depth: depth cut-off
+    :return: (action, evaluate score) pair
+    """
+    if node.isOver() or depth <= 0:
+        return None, evaluation_functions[current_player_index](node, current_player_index)
+
+    next_action = None
+
+    next_player_index = utility.get_next_player_index(node, current_player_index)
+    for action in node.getLegalActions(current_player_index):
+        next_node = node.generateSuccessor(current_player_index, action)
+
+        _, new_alpha = -alpha_beta(next_node, -beta, -alpha, evaluation_functions, next_player_index, depth-1)
+        if new_alpha > alpha:
+            alpha = new_alpha
+            next_action = action
+
+        if alpha >= beta:
+            return action, beta
+
+    return next_action, alpha
