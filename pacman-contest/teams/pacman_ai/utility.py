@@ -62,3 +62,15 @@ def get_self_agent_indices(game_state: GameState, agent_index):
         return game_state.getRedTeamIndices()
     else:
         return game_state.getBlueTeamIndices()
+
+
+def get_next_player_index(game_state: GameState, agent_index):
+    """
+    :param game_state:
+    :param agent_index: current playing player's index
+    :return: next playing player's index
+    """
+    agent_index += 1
+    if agent_index == game_state.getNumAgents():
+        agent_index = 0
+    return  agent_index
