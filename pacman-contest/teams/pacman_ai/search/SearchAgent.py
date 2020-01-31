@@ -5,13 +5,15 @@ Date:        2020-1-16 14:48:56
 Description: contains agent for "Heuristic Search Algorithms (using general or pacman specific heuristic functions)"
 """
 
-from teams.pacman_ai.omniscient.OmniscientAgent import OmniscientAgent
+from teams.pacman_ai.BasicAgent import BasicAgent
 import random
 from capture import GameState
 from captureAgents import CaptureAgent
 import teams.pacman_ai.utility as utility
+from util import Counter
 
-class SearchAgent(OmniscientAgent):
+
+class SearchAgent(BasicAgent):
     """
     A Search agent:
     """
@@ -62,6 +64,9 @@ class SearchAgent(OmniscientAgent):
         '''
         You should change this in your own agent.
         '''
+        # code to test dead end calculation
+        # dist = Counter({key: 1 for key in self.dead_end_path})
+        # self.displayDistributionsOverPositions([dist])
 
         for i in range(0, 4):
             print(i, gameState.getAgentState(i))

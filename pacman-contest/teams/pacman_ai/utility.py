@@ -5,7 +5,10 @@ Date:        2020-1-20 22:15:33
 Description: some helper functions
 """
 
-from capture import GameState
+from capture import GameState, halfGrid
+from teams.pacman_ai.constant import DELTA, NUM_DIRECTIONS
+from collections import defaultdict
+from util import Stack
 
 
 def get_agents_positions(game_state: GameState, self_index):
@@ -134,3 +137,88 @@ def get_next_player_index(game_state: GameState, agent_index):
 
 def is_agent_ghost(game_state: GameState, agent_index):
     return not game_state.getAgentState(agent_index).isPacman
+
+
+def calculate_dead_end(movable_list, neighbors):
+    """
+    :param movable_list:
+    :param neighbors:
+    :return: {location: position to move to location} of a series of location in dead_ends
+    """
+    parent = {}  # parent means the dead end location (key) move from the parent[key] (value)
+    stack = Stack()
+    dead_ends = calculate_location_with_given_number_of_walls(movable_list, 3, neighbors)
+    for dead_end in dead_ends:
+        parent[dead_end] = None
+
+        stack.push(dead_end)
+        while not stack.isEmpty():
+            loc = stack.pop()
+            loc_neighbors = neighbors[loc]
+
+            loc_neighbors_not_in_parent = list(filter(lambda x: x not in parent, loc_neighbors))
+
+            if len(loc_neighbors_not_in_parent) == 1:
+                the_neighbor_not_in_parent = loc_neighbors_not_in_parent[0]
+                parent[loc] = the_neighbor_not_in_parent
+                stack.push(the_neighbor_not_in_parent)
+
+    return parent
+
+
+def calculate_location_with_given_number_of_walls(all_locations, num_walls, neighbors):
+    """
+    :param all_locations:
+    :param num_walls:
+    :param neighbors: {position: [neighbor_position]}
+    :return: location surrounded with given num_walls
+    """
+    res = []
+    for location in all_locations:
+        if len(neighbors[location]) == NUM_DIRECTIONS - num_walls:
+            res.append(location)
+    return res
+
+
+def partition_location(game_state: GameState):
+    """
+    :param game_state:
+    :return: not wall positions for red and blue respectively
+    """
+    red_movable = halfGrid(game_state.getWalls(), True).asList(False)
+    blue_movable = halfGrid(game_state.getWalls(), False).asList(False)
+    return red_movable, blue_movable
+
+
+def tuple_add(x, y):
+    """
+    :param x: (a, b)
+    :param y: (c, d)
+    :return: (a+c, b+d)
+    """
+    return tuple(map(sum, zip(x, y)))
+
+
+def get_neighbor(loc):
+    """
+    :param loc: a (x, y) location in game
+    :return: a list of location
+    """
+    res = []
+    for delta in DELTA:
+        res.append(tuple_add(loc, delta))
+    return res
+
+
+def calculate_neighbors(game_state: GameState, locations):
+    """
+    :param game_state:
+    :param locations:
+    :return: the list of neighbor position of locations
+    """
+    neighbor = defaultdict(lambda: [])
+    for location in locations:
+        for location_neighbor in get_neighbor(location):
+            if not game_state.hasWall(location_neighbor[0], location_neighbor[1]):
+                neighbor[location].append(location_neighbor)
+    return neighbor
