@@ -22,3 +22,10 @@ def dead_end_calculation(wall)
 
     return res
 ```
+
+## initial_offensive 
+```
+def initial_offensive_position_callculation(is_red)
+    second_agent <- closest position
+    first_agent <- random by Counter(rest positions: dist_to_pos)
+```
