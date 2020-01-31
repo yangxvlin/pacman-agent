@@ -15,8 +15,6 @@ def dead_end_calculation(wall)
         stack <- dead_end
         while stack not empty
             loc <- pop stack
-            neighbors = loc's neighbor
-            num_neighbors = len(neighbors)
             # num_neighbors_in_parent means these neighbors are paths in dead end
             if num_neighbors_not_in_parent == 1
                 parent[loc] = the_neighbor_not_in_parent
