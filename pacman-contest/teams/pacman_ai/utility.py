@@ -139,6 +139,7 @@ def is_agent_ghost(game_state: GameState, agent_index):
     return not game_state.getAgentState(agent_index).isPacman
 
 
+# ****************************************** dead end calculation start ***************************************************************************************
 def calculate_dead_end(movable_list, neighbors):
     """
     :param movable_list:
@@ -222,3 +223,4 @@ def calculate_neighbors(game_state: GameState, locations):
             if not game_state.hasWall(location_neighbor[0], location_neighbor[1]):
                 neighbor[location].append(location_neighbor)
     return neighbor
+# ****************************************** dead end calculation end *****************************************************************************************
