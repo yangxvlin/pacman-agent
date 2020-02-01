@@ -10,7 +10,7 @@ import random
 from capture import GameState
 from captureAgents import CaptureAgent
 import teams.pacman_ai.utility as utility
-from util import Counter
+from util import Counter, Stack
 
 
 class SearchAgent(BasicAgent):
@@ -41,19 +41,7 @@ class SearchAgent(BasicAgent):
         '''
         Your initialization code goes here, if you need any.
         '''
-        self.game_state = gameState
-
-        # print(self.getCapsulesYouAreDefending(self.game_state))
-        #
-        # print(self.game_state.teams)
-        #
-        # print(self.red)
-        #
-        # print(self.getTeam(self.game_state))
-        #
-        # print(self.getOpponents(self.game_state))
-
-        # print(gameState.getAgentState(1))
+        self.task_state = Stack()
 
     def chooseAction(self, gameState):
         """
@@ -68,8 +56,11 @@ class SearchAgent(BasicAgent):
         # dist = Counter({key: 1 for key in self.dead_end_path})
         # self.displayDistributionsOverPositions([dist])
 
-        for i in range(0, 4):
-            print(i, gameState.getAgentState(i))
+        # code to test initial offensive target
+        print(self.index, self.INITIAL_TARGET)
+
+        # for i in range(0, 4):
+        #     print(i, gameState.getAgentState(i))
         # print("SearchAgent: self.index=", self.index, gameState.agentDistances)
         # print(gameState.data.agentStates[0].configuration.getPosition())
         # return Directions.STOP

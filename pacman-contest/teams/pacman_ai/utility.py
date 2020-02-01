@@ -6,9 +6,11 @@ Description: some helper functions
 """
 
 from capture import GameState, halfGrid
+from captureAgents import CaptureAgent
 from teams.pacman_ai.constant import DELTA, NUM_DIRECTIONS
 from collections import defaultdict
 from util import Stack
+import random
 
 
 def get_agents_positions(game_state: GameState, self_index):
@@ -186,8 +188,22 @@ def partition_location(game_state: GameState):
     :param game_state:
     :return: not wall positions for red and blue respectively
     """
-    red_movable = halfGrid(game_state.getWalls(), True).asList(False)
-    blue_movable = halfGrid(game_state.getWalls(), False).asList(False)
+    width = game_state.getWalls().width
+    height = game_state.getWalls().height
+    halfway = width // 2
+
+    red_movable = []
+    blue_movable = []
+
+    for x in range(0, width):
+        for y in range(0, height):
+            if game_state.hasWall(x, y):
+                continue
+            if x < halfway:
+                red_movable.append((x, y))
+            else:
+                blue_movable.append((x, y))
+
     return red_movable, blue_movable
 
 
@@ -224,3 +240,37 @@ def calculate_neighbors(game_state: GameState, locations):
                 neighbor[location].append(location_neighbor)
     return neighbor
 # ****************************************** dead end calculation end *****************************************************************************************
+
+
+def agent_boundary_calculation(positions, is_red):
+    # print(positions)
+    xs = list(map(lambda x: x[0], positions))
+    if is_red:
+        max_x = max(xs)
+        return list(filter(lambda x: x[0] == max_x, positions))
+    else:
+        min_x = min(xs)
+        return list(filter(lambda x: x[0] == min_x, positions))
+
+
+def initial_offensive_position_calculation(boundary_positions: list, agent: CaptureAgent, agents_position):
+    from teams.pacman_ai.inference.inference import DiscreteDistribution
+
+    second_agent_index = max(agents_position)
+    first_agent_index = min(agents_position)
+    second_agent_position = agents_position[second_agent_index]
+    first_agent_position = agents_position[first_agent_index]
+
+    # print(boundary_positions)
+    min_dist = min([agent.getMazeDistance(second_agent_position, pos) for pos in boundary_positions])
+    second_agent_target = random.choice(list(filter(lambda x: agent.getMazeDistance(second_agent_position, x) == min_dist, boundary_positions)))
+
+    boundary_positions.remove(second_agent_target)
+    distribution = DiscreteDistribution()
+    for pos in boundary_positions:
+        assert pos != second_agent_target
+        distribution[pos] = agent.getMazeDistance(first_agent_position, pos)
+    distribution.normalize()
+    first_agent_target = distribution.sample()
+
+    return first_agent_target, second_agent_target
