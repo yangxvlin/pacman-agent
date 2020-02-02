@@ -7,7 +7,7 @@ Description: some helper functions
 
 from capture import GameState, halfGrid
 from captureAgents import CaptureAgent
-from teams.pacman_ai.constant import DELTA, NUM_DIRECTIONS
+from teams.pacman_ai.constant import DELTA, DELTA_DIRECTION, NUM_DIRECTIONS
 from collections import defaultdict
 from util import Stack
 import random
@@ -134,7 +134,7 @@ def get_next_player_index(game_state: GameState, agent_index):
     agent_index += 1
     if agent_index == game_state.getNumAgents():
         agent_index = 0
-    return  agent_index
+    return agent_index
 
 
 def is_agent_ghost(game_state: GameState, agent_index):
@@ -253,24 +253,84 @@ def agent_boundary_calculation(positions, is_red):
         return list(filter(lambda x: x[0] == min_x, positions))
 
 
-def initial_offensive_position_calculation(boundary_positions: list, agent: CaptureAgent, agents_position):
+def initial_offensive_position_calculation(red_boundary_positions: list,
+                                           blue_boundary_positions: list,
+                                           agent: CaptureAgent,
+                                           red_agents_position,
+                                           blue_agents_position,
+                                           game_state: GameState):
     from teams.pacman_ai.inference.inference import DiscreteDistribution
 
-    second_agent_index = max(agents_position)
-    first_agent_index = min(agents_position)
-    second_agent_position = agents_position[second_agent_index]
-    first_agent_position = agents_position[first_agent_index]
+    red_boundary_positions_original = red_boundary_positions.copy()
+    blue_boundary_positions_original = blue_boundary_positions.copy()
+    targets = []
 
-    # print(boundary_positions)
-    min_dist = min([agent.getMazeDistance(second_agent_position, pos) for pos in boundary_positions])
-    second_agent_target = random.choice(list(filter(lambda x: agent.getMazeDistance(second_agent_position, x) == min_dist, boundary_positions)))
+    for i in range(0, game_state.getNumAgents()):
+        if game_state.isOnRedTeam(i):
+            if i == 0:
+                # assign closest boundary position to agent0
+                min_dist = min([agent.getMazeDistance(red_agents_position[i], pos) for pos in red_boundary_positions])
+                agent0_target = random.choice(list(filter(lambda x: agent.getMazeDistance(red_agents_position[i], x) == min_dist, red_boundary_positions)))
+                red_boundary_positions.remove(agent0_target)
+                targets.append(agent0_target)
+            else:
+                # no possible positions, start again
+                if not red_boundary_positions:
+                    red_boundary_positions = red_boundary_positions_original.copy()
 
-    boundary_positions.remove(second_agent_target)
-    distribution = DiscreteDistribution()
-    for pos in boundary_positions:
-        assert pos != second_agent_target
-        distribution[pos] = agent.getMazeDistance(first_agent_position, pos)
-    distribution.normalize()
-    first_agent_target = distribution.sample()
+                distribution = DiscreteDistribution()
+                for pos in red_boundary_positions:
+                    distribution[pos] = agent.getMazeDistance(red_agents_position[i], pos)
+                distribution.normalize()
+                agent_i_target = distribution.sample()
+                targets.append(agent_i_target)
+        else:
+            if i == 1:
+                # assign closest boundary position to agent0
+                min_dist = min([agent.getMazeDistance(blue_agents_position[i], pos) for pos in blue_boundary_positions])
+                agent0_target = random.choice(list(filter(lambda x: agent.getMazeDistance(blue_agents_position[i], x) == min_dist, blue_boundary_positions)))
+                blue_boundary_positions.remove(agent0_target)
+                targets.append(agent0_target)
+            else:
+                # no possible positions, start again
+                if not blue_boundary_positions:
+                    blue_boundary_positions = blue_boundary_positions_original.copy()
 
-    return first_agent_target, second_agent_target
+                distribution = DiscreteDistribution()
+                for pos in blue_boundary_positions:
+                    distribution[pos] = agent.getMazeDistance(blue_agents_position[i], pos)
+                distribution.normalize()
+                agent_i_target = distribution.sample()
+                targets.append(agent_i_target)
+
+    return targets
+
+    # second_agent_index = max(agents_position)
+    # first_agent_index = min(agents_position)
+    # second_agent_position = agents_position[second_agent_index]
+    # first_agent_position = agents_position[first_agent_index]
+    #
+    # min_dist = min([agent.getMazeDistance(second_agent_position, pos) for pos in boundary_positions])
+    # second_agent_target = random.choice(list(filter(lambda x: agent.getMazeDistance(second_agent_position, x) == min_dist, boundary_positions)))
+    #
+    # boundary_positions.remove(second_agent_target)
+    # distribution = DiscreteDistribution()
+    # for pos in boundary_positions:
+    #     assert pos != second_agent_target
+    #     distribution[pos] = agent.getMazeDistance(first_agent_position, pos)
+    # distribution.normalize()
+    # first_agent_target = distribution.sample()
+    #
+    # return first_agent_target, second_agent_target
+
+
+def position_to_direction(current_position, next_position):
+    """
+    :param current_position:
+    :param next_position:
+    :return: Directions from current_position to next_position
+    """
+    for delta, direction in zip(DELTA, DELTA_DIRECTION):
+        if tuple_add(current_position, delta) == next_position:
+            return direction
+    return None

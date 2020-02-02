@@ -29,14 +29,12 @@ class BasicAgent(OmniscientAgent):
         self.blue_boundary = utility.agent_boundary_calculation(self.blue_movable, False)
 
         if not BasicAgent.INITIAL_TARGET:
-            if self.red:
-                BasicAgent.INITIAL_TARGET = utility.initial_offensive_position_calculation(self.red_boundary,
-                                                                                           self,
-                                                                                           utility.get_agents_positions(gameState, self.index))
-            else:
-                BasicAgent.INITIAL_TARGET = utility.initial_offensive_position_calculation(self.blue_boundary,
-                                                                                           self,
-                                                                                           utility.get_agents_positions(gameState, self.index))
+            BasicAgent.INITIAL_TARGET = utility.initial_offensive_position_calculation(self.red_boundary,
+                                                                                       self.blue_boundary,
+                                                                                       self,
+                                                                                       utility.get_agents_positions(gameState, 0),
+                                                                                       utility.get_agents_positions(gameState, 1),
+                                                                                       gameState)
 
     def chooseAction(self, gameState):
         util.raiseNotDefined()

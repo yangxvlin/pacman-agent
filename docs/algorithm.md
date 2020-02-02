@@ -26,6 +26,6 @@ def dead_end_calculation(wall)
 ## initial_offensive 
 ```
 def initial_offensive_position_calculation(is_red):
-    second_agent <- closest position
-    first_agent <- random by Counter(rest positions: dist_to_pos) # the more far, higher probility to be chosen
+    first_agent <- closest position # I can't assume that first_agent is the agent that is closest to the position among all agents
+    rest agents <- random by Counter(rest positions: dist_to_pos) # the more far, higher probility to be chosen
 ```

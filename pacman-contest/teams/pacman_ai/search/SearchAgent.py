@@ -6,11 +6,13 @@ Description: contains agent for "Heuristic Search Algorithms (using general or p
 """
 
 from teams.pacman_ai.BasicAgent import BasicAgent
+import teams.pacman_ai.utility as utility
+from teams.pacman_ai.constant import POSITIVE_INFINITY, OFFENSIVE_PREPARATION, OFFENSIVE
 import random
 from capture import GameState
 from captureAgents import CaptureAgent
-import teams.pacman_ai.utility as utility
 from util import Counter, Stack
+from game import Directions
 
 
 class SearchAgent(BasicAgent):
@@ -42,6 +44,7 @@ class SearchAgent(BasicAgent):
         Your initialization code goes here, if you need any.
         '''
         self.task_state = Stack()
+        self.task_state.push(OFFENSIVE_PREPARATION)
 
     def chooseAction(self, gameState):
         """
@@ -57,17 +60,46 @@ class SearchAgent(BasicAgent):
         # self.displayDistributionsOverPositions([dist])
 
         # code to test initial offensive target
-        print(self.index, self.INITIAL_TARGET)
+        # print(self.index, self.INITIAL_TARGET[self.index], self.INITIAL_TARGET)
 
-        # for i in range(0, 4):
-        #     print(i, gameState.getAgentState(i))
-        # print("SearchAgent: self.index=", self.index, gameState.agentDistances)
-        # print(gameState.data.agentStates[0].configuration.getPosition())
+        agent_position = gameState.getAgentPosition(self.index)
+        current_task = self.task_state.list[0]
+
+        if current_task == OFFENSIVE_PREPARATION:
+            # OFFENSIVE_PREPARATION not finished yet
+            if agent_position != self.INITIAL_TARGET[self.index]:
+                # becomes pacman before reach the target or reach the target, starts OFFENSIVE task
+                if gameState.getAgentState(self.index).isPacman or agent_position == self.INITIAL_TARGET[self.index]:
+                    self.task_state.pop()
+                    self.task_state.push(OFFENSIVE)
+                    return Directions.STOP
+                else:
+                    next_position = greedy_maze_distance(self, agent_position, self.INITIAL_TARGET[self.index])
+                    return utility.position_to_direction(agent_position, next_position)
+
         # return Directions.STOP
         return random.choice(actions)
 
 
-def alpha_beta(node: GameState, alpha, beta, evaluation_functions, current_player_index, team_indices, search_agent: CaptureAgent, depth=4):
+def greedy_maze_distance(agent: BasicAgent, agent_position, agent_target):
+    next_position = None
+    next_position_cost = POSITIVE_INFINITY
+
+    for neighbor in agent.neighbors[agent_position]:
+        if not next_position:
+            next_position = neighbor
+            next_position_cost = agent.getMazeDistance(neighbor, agent_target)
+            continue
+
+        tmp_next_position_cost = agent.getMazeDistance(neighbor, agent_target)
+        if next_position_cost > tmp_next_position_cost:
+            next_position = neighbor
+            next_position_cost = tmp_next_position_cost
+
+    return next_position
+
+
+def alpha_beta(node: GameState, alpha, beta, evaluation_functions, current_player_index, team_indices, agent: CaptureAgent, depth=4):
     """
     modify from page 16: https://project.dke.maastrichtuniversity.nl/games/files/phd/Nijssen_thesis.pdf
     :param node: game state
@@ -76,15 +108,15 @@ def alpha_beta(node: GameState, alpha, beta, evaluation_functions, current_playe
     :param evaluation_functions: {index: function} pair
     :param current_player_index: the playing player index
     :param team_indices: the agents' indices in one team
-    :param search_agent: CaptureAgent object. used for calculating distance
+    :param agent: CaptureAgent object. used for calculating distance
     :param depth: depth cut-off
     :return: (action, evaluate score) pair
     """
     if node.isOver() or depth <= 0:
         if current_player_index in team_indices:
-            return None, evaluation_functions[current_player_index](node, current_player_index, search_agent)
+            return None, evaluation_functions[current_player_index](node, current_player_index, agent)
         else:
-            return None, -evaluation_functions[current_player_index](node, current_player_index, search_agent)
+            return None, -evaluation_functions[current_player_index](node, current_player_index, agent)
 
     next_action = None
 
@@ -92,7 +124,7 @@ def alpha_beta(node: GameState, alpha, beta, evaluation_functions, current_playe
     for action in node.getLegalActions(current_player_index):
         next_node = node.generateSuccessor(current_player_index, action)
 
-        _, v = alpha_beta(next_node, -beta, -alpha, evaluation_functions, next_player_index, team_indices, search_agent, depth-1)
+        _, v = alpha_beta(next_node, -beta, -alpha, evaluation_functions, next_player_index, team_indices, agent, depth - 1)
         v *= -1
 
         if v > alpha:
