@@ -334,3 +334,16 @@ def position_to_direction(current_position, next_position):
         if tuple_add(current_position, delta) == next_position:
             return direction
     return None
+
+
+def closest_food(agent_position, game_state: GameState, is_red, agent: CaptureAgent):
+    food = []
+    if is_red:
+        food = game_state.getBlueFood().asList()
+    else:
+        food = game_state.getRedFood().asList()
+
+    min_dist = min([agent.getMazeDistance(agent_position, pos) for pos in food])
+    chosen_food = random.choice(list(filter(lambda x: agent.getMazeDistance(agent_position, x) == min_dist, food)))
+
+    return chosen_food

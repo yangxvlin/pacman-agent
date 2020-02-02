@@ -11,8 +11,9 @@ from teams.pacman_ai.constant import POSITIVE_INFINITY, OFFENSIVE_PREPARATION, O
 import random
 from capture import GameState
 from captureAgents import CaptureAgent
-from util import Counter, Stack
+from util import Counter, Stack, PriorityQueue, manhattanDistance
 from game import Directions
+import collections
 
 
 class SearchAgent(BasicAgent):
@@ -72,16 +73,114 @@ class SearchAgent(BasicAgent):
                 if gameState.getAgentState(self.index).isPacman or agent_position == self.INITIAL_TARGET[self.index]:
                     self.task_state.pop()
                     self.task_state.push(OFFENSIVE)
-                    return Directions.STOP
+                    return a_star_path(agent_position,
+                                       [utility.closest_food(agent_position, gameState, self.red, self)],
+                                       utility.get_opponents_ghosts_positions(gameState, self.index),
+                                       self.neighbors,
+                                       self,
+                                       1)[0]
                 else:
                     next_position = greedy_maze_distance(self, agent_position, self.INITIAL_TARGET[self.index])
                     return utility.position_to_direction(agent_position, next_position)
+        elif current_task == OFFENSIVE:
+            return a_star_path(agent_position,
+                               [utility.closest_food(agent_position, gameState, self.red, self)],
+                               utility.get_opponents_ghosts_positions(gameState, self.index),
+                               self.neighbors,
+                               self,
+                               1)[0]
 
         # return Directions.STOP
         return random.choice(actions)
 
 
+# ******************************************************** pacman a star path search starts *******************************************************************
+def back_track(goal_state, start_state, history):
+    """
+    :param goal_state:  goal
+    :param start_state:  start
+    :param history: a dictionary of {(x, y): (parent Position, direction from parent Position)}
+    :return: a list of Direction from `start_state` to `goal_state`
+    """
+    result = []
+
+    current_state = goal_state
+    print(goal_state, start_state)
+    print(history)
+
+    while hash(current_state) != hash(start_state):
+        previous_state, previous_direction = history[current_state]
+        result.append(previous_direction)
+        current_state = previous_state
+
+    return result[::-1]
+
+
+def a_star_path(agent_position, targets: list, ghosts: list, neighbors, agent: CaptureAgent, ghost_influence_range=0, step_cost=1):
+    opened_list = PriorityQueue()
+    start_state = (agent_position, tuple(targets))
+    opened_list.push(start_state, 0)  # {(agents_position, positions_to_go_to): priority}
+    history = {}
+    cost_so_far = collections.defaultdict(lambda: 0)
+
+    while not opened_list.isEmpty():
+        current_state = opened_list.pop()
+        current_position, current_targets = current_state
+
+        if not current_targets:
+            return back_track(current_position, agent_position, history)
+
+        for next_step in _get_successors(current_position, current_targets, ghosts, neighbors, agent, ghost_influence_range, step_cost):
+            next_state, next_direction, step_cost = next_step
+            next_position, _ = next_state
+            new_cost = cost_so_far[current_state] + step_cost
+
+            if next_state not in cost_so_far or new_cost < cost_so_far[next_state]:
+                history[next_position] = (current_position, next_direction)
+                priority = new_cost + _h2(next_state[0], next_state[1])
+                opened_list.push(next_state, priority)
+                cost_so_far[next_state] = new_cost
+    print(history)
+    print(cost_so_far)
+
+def _h2(start, goal_locations):
+    """
+    :param start: location to start
+    :param goal_locations:  list of locations to go to
+    :return: from start location to most far goal manhattan distance
+    """
+    result = [0]
+
+    for goal in goal_locations:
+        result.append(manhattanDistance(start, goal))
+    return max(result)
+
+
+def _get_successors(agent_position, targets: list, ghosts: list, neighbors, agent: CaptureAgent, ghost_influence_range, step_cost):
+    res = []
+
+    for next_position in neighbors[agent_position]:
+        # next_position is not in influenced area of ghosts
+        if all([agent.getMazeDistance(next_position, ghost_position) > ghost_influence_range for ghost_position in ghosts]):
+            if next_position not in targets:
+                res.append(((next_position, targets), utility.position_to_direction(agent_position, next_position), step_cost))
+            else:
+                next_target = list(targets).copy()
+                next_target.remove(next_position)
+                res.append(((next_position, tuple(next_target)), utility.position_to_direction(agent_position, next_position), step_cost))
+    return res
+
+
+# ******************************************************** pacman a star path search ends *********************************************************************
+
+
 def greedy_maze_distance(agent: BasicAgent, agent_position, agent_target):
+    """
+    :param agent:
+    :param agent_position:
+    :param agent_target:
+    :return: choose next position to go based on pre-calculated maze-distance
+    """
     next_position = None
     next_position_cost = POSITIVE_INFINITY
 
