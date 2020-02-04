@@ -7,9 +7,10 @@ Description: some helper functions
 
 from capture import GameState, halfGrid
 from captureAgents import CaptureAgent
-from teams.pacman_ai.constant import DELTA, DELTA_DIRECTION, NUM_DIRECTIONS
+from teams.pacman_ai.constant import DELTA, DELTA_DIRECTION, NUM_DIRECTIONS, POSITIVE_INFINITY
 from collections import defaultdict
 from util import Stack
+from game import Directions
 import random
 
 
@@ -77,13 +78,21 @@ def get_opponents_ghosts_positions(game_state: GameState, agent_index):
     """
     :param game_state:
     :param agent_index:
-    :return list of opponents ghosts position
+    :return dictionary of opponents ghosts position
     """
-    positions = []
+    positions = {}
     for i in get_opponents_agent_indices(game_state, agent_index):
         if is_agent_ghost(game_state, i):
-            positions.append(game_state.getAgentPosition(i))
+            positions[i] = game_state.getAgentPosition(i)
     return positions
+
+
+def get_opponents_ghosts_min_dist(game_state: GameState, agent_index, agent: CaptureAgent, agent_position):
+    opponents_ghosts_positions = get_opponents_ghosts_positions(game_state, agent_index).values()
+    if not opponents_ghosts_positions:
+        return POSITIVE_INFINITY
+    else:
+        return min(list(map(lambda x: agent.getMazeDistance(agent_position, x), opponents_ghosts_positions)))
 
 
 def get_opponents_agent_num(game_state: GameState, agent_index):
@@ -139,6 +148,19 @@ def get_next_player_index(game_state: GameState, agent_index):
 
 def is_agent_ghost(game_state: GameState, agent_index):
     return not game_state.getAgentState(agent_index).isPacman
+
+
+def is_agent_scared(game_state: GameState, agent_index):
+    return game_state.getAgentState(agent_index).scaredTimer > 0
+
+
+def get_action_result(agent_position, action):
+    for delta, direction in zip(DELTA, DELTA_DIRECTION):
+        if direction == action:
+            return tuple_add(agent_position, delta)
+    # otherwise the action is STOP
+    assert action == Directions.STOP
+    return agent_position
 
 
 # ****************************************** dead end calculation start ***************************************************************************************
@@ -240,6 +262,22 @@ def calculate_neighbors(game_state: GameState, locations):
                 neighbor[location].append(location_neighbor)
     return neighbor
 # ****************************************** dead end calculation end *****************************************************************************************
+
+
+def is_in_the_same_dead_end_path(dead_end_path, pos1, pos2):
+    if pos1 not in dead_end_path or pos2 not in dead_end_path:
+        return False
+
+    pos1_source = pos1
+    pos2_source = pos2
+
+    while pos1_source in dead_end_path:
+        pos1_source = dead_end_path[pos1_source]
+
+    while pos2_source in dead_end_path:
+        pos2_source = dead_end_path[pos2_source]
+
+    return pos1_source == pos2_source
 
 
 def agent_boundary_calculation(positions, is_red):

@@ -33,7 +33,7 @@
 
 
 ## possible improvement
-1. [trap detection] for food in dead end, agent decide to eat it when ```2*dist_to_food < dist_to_ghost``` in order to avoid being captured
+1. [trap detection] for food in dead end, agent decide to eat it when ```2*dist_to_food <= dist_to_ghost``` in order to avoid being captured
 2. when there is a food being eaten, we can use this information to infer the opponent's agent's position
 3. discourage 'reverse' and 'stop' action
 4. when using MCT, step size should be wisely dynamically determined (5 step because of visual range)

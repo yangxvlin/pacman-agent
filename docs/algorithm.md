@@ -27,5 +27,13 @@ def dead_end_calculation(wall)
 ```
 def initial_offensive_position_calculation(is_red):
     first_agent <- closest position # I can't assume that first_agent is the agent that is closest to the position among all agents
-    rest agents <- random by Counter(rest positions: dist_to_pos) # the more far, higher probility to be chosen
+    rest_agents <- random by Counter(rest positions: dist_to_pos) # the more far, higher probility to be chosen
+```
+
+## offensive_food_selection
+```
+def offensive_food_selection(is_red):
+    for food sorted by dist_to_agent:
+        if save_to_go_to and has_path_to_go_to
+            go to eat this food
 ```

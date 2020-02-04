@@ -65,33 +65,56 @@ class SearchAgent(BasicAgent):
 
         agent_position = gameState.getAgentPosition(self.index)
         current_task = self.task_state.list[0]
+        print(self.index, current_task)
 
         if current_task == OFFENSIVE_PREPARATION:
-            # OFFENSIVE_PREPARATION not finished yet
-            if agent_position != self.INITIAL_TARGET[self.index]:
-                # becomes pacman before reach the target or reach the target, starts OFFENSIVE task
-                if gameState.getAgentState(self.index).isPacman or agent_position == self.INITIAL_TARGET[self.index]:
-                    self.task_state.pop()
-                    self.task_state.push(OFFENSIVE)
-                    return a_star_path(agent_position,
-                                       [utility.closest_food(agent_position, gameState, self.red, self)],
-                                       utility.get_opponents_ghosts_positions(gameState, self.index),
-                                       self.neighbors,
-                                       self,
-                                       1)[0]
-                else:
+            # OFFENSIVE_PREPARATION not finished yet (i.e. not reach target nor becomes pacman)
+            if agent_position != self.INITIAL_TARGET[self.index] and not gameState.getAgentState(self.index).isPacman:
                     next_position = greedy_maze_distance(self, agent_position, self.INITIAL_TARGET[self.index])
                     return utility.position_to_direction(agent_position, next_position)
-        elif current_task == OFFENSIVE:
-            return a_star_path(agent_position,
-                               [utility.closest_food(agent_position, gameState, self.red, self)],
-                               utility.get_opponents_ghosts_positions(gameState, self.index),
-                               self.neighbors,
-                               self,
-                               1)[0]
+            # becomes pacman before reach the target or reach the target, starts OFFENSIVE task
+            else:
+                self.task_state.pop()
+                self.task_state.push(OFFENSIVE)
+                return offensive_food_selection(gameState, self, agent_position, self.index)
 
-        # return Directions.STOP
-        return random.choice(actions)
+        elif current_task == OFFENSIVE:
+            res = offensive_food_selection(gameState, self, agent_position, self.index)
+            if res:
+                return res
+
+        return Directions.STOP
+        # return random.choice(actions)
+
+
+def offensive_food_selection(game_state: GameState, agent: BasicAgent, agent_position, agent_index):
+    foods = agent.getFood(game_state).asList()
+    foods = sorted(foods, key=lambda x: agent.getMazeDistance(agent_position, x))
+
+    for food in foods:
+        dist_to_food = agent.getMazeDistance(agent_position, food)
+        dist_to_closest_ghost = utility.get_opponents_ghosts_min_dist(game_state, agent_index, agent, agent_position)
+        path_to_food = a_star_path(game_state,
+                                   agent_position,
+                                   [food],
+                                   utility.get_opponents_ghosts_positions(game_state, agent_index),
+                                   agent.neighbors,
+                                   agent,
+                                   1)
+
+        # food in unreachable
+        if not path_to_food:
+            continue
+
+        agent_next_position = utility.get_action_result(agent_position, path_to_food[0])
+
+        # too danger to eat the food
+        # food and agent in the same dead end path, danger to enter the dead end path if 2 * dist_to_food >= dist_to_closest_ghost
+        if agent_next_position in agent.dead_end_path_length and food in agent.dead_end_path_length and 2 * dist_to_food > dist_to_closest_ghost and \
+                utility.is_in_the_same_dead_end_path(agent.dead_end_path, agent_next_position, food):
+            continue
+
+        return path_to_food[0]
 
 
 # ******************************************************** pacman a star path search starts *******************************************************************
@@ -105,8 +128,6 @@ def back_track(goal_state, start_state, history):
     result = []
 
     current_state = goal_state
-    print(goal_state, start_state)
-    print(history)
 
     while hash(current_state) != hash(start_state):
         previous_state, previous_direction = history[current_state]
@@ -116,7 +137,7 @@ def back_track(goal_state, start_state, history):
     return result[::-1]
 
 
-def a_star_path(agent_position, targets: list, ghosts: list, neighbors, agent: CaptureAgent, ghost_influence_range=0, step_cost=1):
+def a_star_path(game_state: GameState, agent_position, targets: list, ghosts: dict, neighbors, agent: CaptureAgent, ghost_influence_range=0, step_cost=1):
     opened_list = PriorityQueue()
     start_state = (agent_position, tuple(targets))
     opened_list.push(start_state, 0)  # {(agents_position, positions_to_go_to): priority}
@@ -130,7 +151,7 @@ def a_star_path(agent_position, targets: list, ghosts: list, neighbors, agent: C
         if not current_targets:
             return back_track(current_position, agent_position, history)
 
-        for next_step in _get_successors(current_position, current_targets, ghosts, neighbors, agent, ghost_influence_range, step_cost):
+        for next_step in _get_successors(game_state, current_position, current_targets, ghosts, neighbors, agent, ghost_influence_range, step_cost):
             next_state, next_direction, step_cost = next_step
             next_position, _ = next_state
             new_cost = cost_so_far[current_state] + step_cost
@@ -140,8 +161,7 @@ def a_star_path(agent_position, targets: list, ghosts: list, neighbors, agent: C
                 priority = new_cost + _h2(next_state[0], next_state[1])
                 opened_list.push(next_state, priority)
                 cost_so_far[next_state] = new_cost
-    print(history)
-    print(cost_so_far)
+
 
 def _h2(start, goal_locations):
     """
@@ -156,12 +176,13 @@ def _h2(start, goal_locations):
     return max(result)
 
 
-def _get_successors(agent_position, targets: list, ghosts: list, neighbors, agent: CaptureAgent, ghost_influence_range, step_cost):
+def _get_successors(game_state: GameState, agent_position, targets: list, ghosts: dict, neighbors, agent: CaptureAgent, ghost_influence_range, step_cost):
     res = []
 
     for next_position in neighbors[agent_position]:
-        # next_position is not in influenced area of ghosts
-        if all([agent.getMazeDistance(next_position, ghost_position) > ghost_influence_range for ghost_position in ghosts]):
+        # next_position is not in influenced area of ghosts or ghost os scared
+        if all([utility.is_agent_scared(game_state, ghost_agent_index) or agent.getMazeDistance(next_position, ghost_position) > ghost_influence_range
+                for ghost_agent_index, ghost_position in ghosts.items()]):
             if next_position not in targets:
                 res.append(((next_position, targets), utility.position_to_direction(agent_position, next_position), step_cost))
             else:

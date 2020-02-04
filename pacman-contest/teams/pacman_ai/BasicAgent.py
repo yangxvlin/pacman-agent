@@ -25,6 +25,7 @@ class BasicAgent(OmniscientAgent):
         self.all_movable = gameState.getWalls().asList(False)
         self.neighbors = utility.calculate_neighbors(gameState, self.all_movable)
         self.dead_end_path = utility.calculate_dead_end(self.all_movable, self.neighbors)
+        self.dead_end_path_length = dead_end_path_length_calculation(self.dead_end_path)
         self.red_boundary = utility.agent_boundary_calculation(self.red_movable, True)
         self.blue_boundary = utility.agent_boundary_calculation(self.blue_movable, False)
 
@@ -38,3 +39,21 @@ class BasicAgent(OmniscientAgent):
 
     def chooseAction(self, gameState):
         util.raiseNotDefined()
+
+
+def dfs_dead_end_path(pos, dead_end_path, accumulator=0):
+
+    # reach dead end, return
+    if pos not in dead_end_path or not dead_end_path[pos]:
+        return accumulator
+    else:
+        return dfs_dead_end_path(dead_end_path[pos], dead_end_path, accumulator+1)
+
+
+def dead_end_path_length_calculation(dead_end_path):
+    dead_end_path_length = {}
+
+    for position in dead_end_path:
+        dead_end_path_length[position] = dfs_dead_end_path(position, dead_end_path)
+
+    return dead_end_path_length

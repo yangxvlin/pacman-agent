@@ -32,7 +32,7 @@ def opponent_ghost_distance_evaluation(game_state: GameState, agent_index, searc
     :param search_agent: CaptureAgent to get mazeDistance
     :return: evaluate how far is the agent from opponents ghosts
     """
-    opponent_ghost_positions = utility.get_opponents_ghosts_positions(game_state, agent_index)
+    opponent_ghost_positions = utility.get_opponents_ghosts_positions(game_state, agent_index).values()
     if opponent_ghost_positions:
         agent_position = game_state.getAgentPosition(agent_index)
         max_dist = NEGATIVE_INFINITY
@@ -50,7 +50,7 @@ def opponent_pacman_distance_evaluation(game_state: GameState, agent_index, sear
     :param search_agent: CaptureAgent to get mazeDistance
     :return: evaluate how far is the agent from opponents pacman
     """
-    opponent_ghost_positions = utility.get_opponents_ghosts_positions(game_state, agent_index)
+    opponent_ghost_positions = utility.get_opponents_ghosts_positions(game_state, agent_index).values()
     if opponent_ghost_positions:
         agent_position = game_state.getAgentPosition(agent_index)
         max_dist = NEGATIVE_INFINITY
