@@ -88,11 +88,16 @@ def get_opponents_ghosts_positions(game_state: GameState, agent_index):
 
 
 def get_opponents_ghosts_min_dist(game_state: GameState, agent_index, agent: CaptureAgent, agent_position):
-    opponents_ghosts_positions = get_opponents_ghosts_positions(game_state, agent_index).values()
-    if not opponents_ghosts_positions:
-        return POSITIVE_INFINITY
-    else:
-        return min(list(map(lambda x: agent.getMazeDistance(agent_position, x), opponents_ghosts_positions)))
+    opponents_ghosts_positions = get_opponents_ghosts_positions(game_state, agent_index)
+
+    min_dist = POSITIVE_INFINITY
+
+    for agent_ghost_index, ghost_position in opponents_ghosts_positions.items():
+        dist = agent.getMazeDistance(agent_position, ghost_position)
+        if not is_agent_scared(game_state, agent_ghost_index) and dist < min_dist:
+            min_dist = dist
+
+    return min_dist
 
 
 def get_opponents_agent_num(game_state: GameState, agent_index):
