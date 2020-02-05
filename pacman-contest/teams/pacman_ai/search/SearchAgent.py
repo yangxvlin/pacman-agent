@@ -119,7 +119,7 @@ def offensive_food_selection(game_state: GameState, agent: SearchAgent, agent_po
             continue
 
         # lock the target food for the agent
-        if not utility.is_food_locked(food, agent_index, agent, game_state):
+        if not utility.is_food_locked(food, agent_index, agent, game_state, 3):
             agent.FOOD_TARGET[agent_index] = food
 
         return path_to_food[0]

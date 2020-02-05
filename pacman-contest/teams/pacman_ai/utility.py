@@ -168,11 +168,50 @@ def get_action_result(agent_position, action):
     return agent_position
 
 
-def is_food_locked(food, agent_index, agent, game_state: GameState):
+def is_food_locked(food, agent_index, agent, game_state: GameState, cluster_range):
     for i in get_self_agent_indices(game_state, agent_index):
         if i != agent_index:
-            if i in agent.FOOD_TARGET and food == agent.FOOD_TARGET[i]:
+            if i in agent.FOOD_TARGET and are_foods_in_same_cluster(food, agent.FOOD_TARGET[i], game_state, agent, cluster_range):
                 return True
+    return False
+
+
+def are_foods_in_same_cluster(food1, food2, game_state: GameState, agent: CaptureAgent, cluster_radius=0):
+    """
+
+    :param food1:
+    :param food2:
+    :param game_state:
+    :param agent:
+    :param cluster_radius: inclusive
+    :return:
+    """
+    foods_can_eat = agent.getFood(game_state)
+
+    visited = set()
+
+    stack = Stack()
+    stack.push(food1)
+
+    while not stack.isEmpty():
+        current_food = stack.pop()
+        visited.add(current_food)
+
+        if current_food == food2:
+            return True
+
+        for neighbor in get_neighbor(current_food):
+            # although this food is connected with food1, this food is too far and not considered in the cluster
+            if agent.getMazeDistance(current_food, food1) > cluster_radius:
+                continue
+
+            if neighbor in visited:
+                continue
+
+            x, y = neighbor
+            if foods_can_eat[x][y]:
+                stack.push(neighbor)
+
     return False
 
 
