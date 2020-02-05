@@ -21,6 +21,8 @@ class SearchAgent(BasicAgent):
     A Search agent:
     """
 
+    FOOD_TARGET = {}
+
     def __init__(self, index, timeForComputing=.1):
         super().__init__(index, timeForComputing)
 
@@ -83,11 +85,13 @@ class SearchAgent(BasicAgent):
             if res:
                 return res
 
+        # no food selection, so food not targeted
+        self.FOOD_TARGET[self.index] = None
         return Directions.STOP
         # return random.choice(actions)
 
 
-def offensive_food_selection(game_state: GameState, agent: BasicAgent, agent_position, agent_index):
+def offensive_food_selection(game_state: GameState, agent: SearchAgent, agent_position, agent_index):
     foods = agent.getFood(game_state).asList()
     foods = sorted(foods, key=lambda x: agent.getMazeDistance(agent_position, x))
 
@@ -113,6 +117,10 @@ def offensive_food_selection(game_state: GameState, agent: BasicAgent, agent_pos
         if agent_next_position in agent.dead_end_path_length and food in agent.dead_end_path_length and 2 * dist_to_food > dist_to_closest_ghost-1 and \
                 utility.is_in_the_same_dead_end_path(agent.dead_end_path, agent_next_position, food):
             continue
+
+        # lock the target food for the agent
+        if not utility.is_food_locked(food, agent_index, agent, game_state):
+            agent.FOOD_TARGET[agent_index] = food
 
         return path_to_food[0]
 
@@ -180,7 +188,7 @@ def _get_successors(game_state: GameState, agent_position, targets: list, ghosts
     res = []
 
     for next_position in neighbors[agent_position]:
-        # next_position is not in influenced area of ghosts or ghost os scared
+        # next_position is not in influenced area of ghosts or ghost is scared
         if all([utility.is_agent_scared(game_state, ghost_agent_index) or agent.getMazeDistance(next_position, ghost_position) > ghost_influence_range
                 for ghost_agent_index, ghost_position in ghosts.items()]):
             if next_position not in targets:
