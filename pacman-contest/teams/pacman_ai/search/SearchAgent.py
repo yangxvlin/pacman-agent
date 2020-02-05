@@ -7,7 +7,7 @@ Description: contains agent for "Heuristic Search Algorithms (using general or p
 
 from teams.pacman_ai.BasicAgent import BasicAgent
 import teams.pacman_ai.utility as utility
-from teams.pacman_ai.constant import POSITIVE_INFINITY, OFFENSIVE_PREPARATION, OFFENSIVE
+from teams.pacman_ai.constant import POSITIVE_INFINITY, OFFENSIVE_PREPARATION, OFFENSIVE, DEFAULT_FOOD_PACK_NUM
 import random
 from capture import GameState
 from captureAgents import CaptureAgent
@@ -49,6 +49,8 @@ class SearchAgent(BasicAgent):
         self.task_state = Stack()
         self.task_state.push(OFFENSIVE_PREPARATION)
 
+        self.food_pack_num = DEFAULT_FOOD_PACK_NUM
+
     def chooseAction(self, gameState):
         """
         Picks action based on the search result.
@@ -81,6 +83,8 @@ class SearchAgent(BasicAgent):
                 return offensive_food_selection(gameState, self, agent_position, self.index)
 
         elif current_task == OFFENSIVE:
+
+
             res = offensive_food_selection(gameState, self, agent_position, self.index)
             if res:
                 return res

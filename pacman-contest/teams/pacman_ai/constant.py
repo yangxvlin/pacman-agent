@@ -23,6 +23,8 @@ DELTA_DIRECTION = (Directions.NORTH, Directions.EAST, Directions.SOUTH, Directio
 """ number of legal directions """
 NUM_DIRECTIONS = 4
 
+""" default number of foods to be packed on the pacman """
+DEFAULT_FOOD_PACK_NUM = 3
 
 # ******************************************************* hand coded decision tree state starts ***************************************************************
 """ the state to let agent to move to the calculated boundary position """
