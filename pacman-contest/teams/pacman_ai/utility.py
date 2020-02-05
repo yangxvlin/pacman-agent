@@ -168,6 +168,14 @@ def get_action_result(agent_position, action):
     return agent_position
 
 
+def is_food_locked(food, agent_index, agent, game_state: GameState):
+    for i in get_self_agent_indices(game_state, agent_index):
+        if i != agent_index:
+            if i in agent.FOOD_TARGET and food == agent.FOOD_TARGET[i]:
+                return True
+    return False
+
+
 # ****************************************** dead end calculation start ***************************************************************************************
 def calculate_dead_end(movable_list, neighbors):
     """
