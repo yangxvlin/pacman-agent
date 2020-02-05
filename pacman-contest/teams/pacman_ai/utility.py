@@ -215,6 +215,10 @@ def are_foods_in_same_cluster(food1, food2, game_state: GameState, agent: Captur
     return False
 
 
+def get_agent_num_food_packed(game_state: GameState, agent_index):
+    return game_state.getAgentState(agent_index).numCarrying
+
+
 # ****************************************** dead end calculation start ***************************************************************************************
 def calculate_dead_end(movable_list, neighbors):
     """
