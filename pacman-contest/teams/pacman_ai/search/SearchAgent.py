@@ -7,7 +7,7 @@ Description: contains agent for "Heuristic Search Algorithms (using general or p
 
 from teams.pacman_ai.BasicAgent import BasicAgent
 import teams.pacman_ai.utility as utility
-from teams.pacman_ai.constant import POSITIVE_INFINITY, OFFENSIVE_PREPARATION, OFFENSIVE, DEFAULT_FOOD_PACK_NUM
+from teams.pacman_ai.constant import POSITIVE_INFINITY, OFFENSIVE_PREPARATION, OFFENSIVE, RETURN, DEFAULT_FOOD_PACK_NUM
 import random
 from capture import GameState
 from captureAgents import CaptureAgent
@@ -68,6 +68,7 @@ class SearchAgent(BasicAgent):
         # print(self.index, self.INITIAL_TARGET[self.index], self.INITIAL_TARGET)
 
         agent_position = gameState.getAgentPosition(self.index)
+        agent_food_packed = utility.get_agent_num_food_packed(gameState, self.index)
         current_task = self.task_state.list[0]
         print(self.index, current_task)
 
@@ -83,14 +84,63 @@ class SearchAgent(BasicAgent):
                 return offensive_food_selection(gameState, self, agent_position, self.index)
 
         elif current_task == OFFENSIVE:
+            next_action = None
 
+            # enough food packed, time to return
+            if agent_food_packed >= self.food_pack_num:
+                # however still has chance to eat easy food, so try to eat it
+                if utility.is_adjacent_to_food(gameState, agent_position):
+                    next_action = offensive_food_selection(gameState, self, agent_position, self.index)  # OFFENSIVE eat food
+                    # no food can eat, RETURN
+                    if not next_action:
+                        self.task_state.push(RETURN)
+                        return return_path_selection_pure_fabric(gameState, self, agent_position, self.index, self.get_self_boundary())
 
-            res = offensive_food_selection(gameState, self, agent_position, self.index)
-            if res:
-                return res
+                    adj_foods = utility.get_adjacent_food(gameState, agent_position)
+                    next_position = utility.get_action_result(agent_position, next_action)
 
-        # no food selection, so food not targeted
-        self.FOOD_TARGET[self.index] = None
+                    # goes to eat additional food
+                    if next_position in adj_foods:
+                        self.food_pack_num += 1
+                        return next_action
+
+                    # not eating the adj_foods, so RETURN
+                    else:
+                        self.task_state.push(RETURN)
+                        return return_path_selection_pure_fabric(gameState, self, agent_position, self.index, self.get_self_boundary())
+
+                # find a path to RETURN
+                else:
+                    self.task_state.push(RETURN)
+                    return return_path_selection_pure_fabric(gameState, self, agent_position, self.index, self.get_self_boundary())
+
+            # try to eat food
+            if not next_action:
+                next_action = offensive_food_selection(gameState, self, agent_position, self.index)  # OFFENSIVE eat food
+            # no path to eat food, so RETURN
+            if not next_action:
+                self.task_state.push(RETURN)
+                next_action = return_path_selection_pure_fabric(gameState, self, agent_position, self.index, self.get_self_boundary())
+            return next_action
+
+        elif current_task == RETURN:
+            # returned TODO reassess task to do
+            if agent_position in self.get_self_boundary():
+                next_action = offensive_food_selection(gameState, self, agent_position, self.index)  # OFFENSIVE eat food
+                if next_action:
+                    self.task_state.pop()
+                    self.food_pack_num = min(DEFAULT_FOOD_PACK_NUM, self.getFood(gameState).count())
+                    return next_action
+                else:
+                    # TODO defense
+                    return Directions.STOP
+            # not returned yet
+            else:
+                next_action = return_path_selection_pure_fabric(gameState, self, agent_position, self.index, self.get_self_boundary())
+            return next_action
+
+        # Note: when no food selection, so food not targeted
+        # self.FOOD_TARGET[self.index] = None
         return Directions.STOP
         # return random.choice(actions)
 
@@ -108,6 +158,8 @@ def offensive_food_selection(game_state: GameState, agent: SearchAgent, agent_po
                                    utility.get_opponents_ghosts_positions(game_state, agent_index),
                                    agent.neighbors,
                                    agent,
+                                   1,
+                                   1,
                                    1)
 
         # food in unreachable
@@ -130,6 +182,53 @@ def offensive_food_selection(game_state: GameState, agent: SearchAgent, agent_po
         return path_to_food[0]
 
 
+def return_path_selection_pure_fabric(game_state: GameState, agent: SearchAgent, agent_position, agent_index, boundary):
+    next_action = return_path_selection(game_state, agent, agent_position, agent_index, boundary)
+    # has path to return
+    if next_action:
+        return next_action
+    else:
+        print("no path to return")
+        return Directions.STOP
+
+
+def return_path_selection(game_state: GameState, agent: SearchAgent, agent_position, agent_index, boundary):
+    # no food selection, so food not targeted
+    agent.FOOD_TARGET[agent_index] = None
+
+    return_to_boundary_path = a_star_path(game_state,
+                                          agent_position,
+                                          boundary,
+                                          utility.get_opponents_ghosts_positions(game_state, agent_index),
+                                          agent.neighbors,
+                                          agent,
+                                          1,
+                                          1,
+                                          1)
+
+    # has path to self boundary
+    if return_to_boundary_path:
+        return return_to_boundary_path[0]
+
+    # no path to return, so eat capsule
+    capsules = agent.getCapsules(game_state)
+    if capsules:
+        eat_capsule_path = a_star_path(game_state,
+                                       agent_position,
+                                       capsules,
+                                       utility.get_opponents_ghosts_positions(game_state, agent_index),
+                                       agent.neighbors,
+                                       agent,
+                                       1,
+                                       1,
+                                       1)
+        if eat_capsule_path:
+            return eat_capsule_path[0]
+
+    # TODO no path to return or eat capsule so just leave as far as pacman can from ghosts
+    return Directions.STOP
+
+
 # ******************************************************** pacman a star path search starts *******************************************************************
 def back_track(goal_state, start_state, history):
     """
@@ -150,7 +249,9 @@ def back_track(goal_state, start_state, history):
     return result[::-1]
 
 
-def a_star_path(game_state: GameState, agent_position, targets: list, ghosts: dict, neighbors, agent: CaptureAgent, ghost_influence_range=0, step_cost=1):
+def a_star_path(game_state: GameState, agent_position, targets: list, ghosts: dict, neighbors, agent: CaptureAgent, num_targets_to_reach=1, ghost_influence_range=0, step_cost=1):
+    num_targets = len(targets)
+    assert num_targets_to_reach <= num_targets
     opened_list = PriorityQueue()
     start_state = (agent_position, tuple(targets))
     opened_list.push(start_state, 0)  # {(agents_position, positions_to_go_to): priority}
@@ -161,7 +262,7 @@ def a_star_path(game_state: GameState, agent_position, targets: list, ghosts: di
         current_state = opened_list.pop()
         current_position, current_targets = current_state
 
-        if not current_targets:
+        if num_targets - len(current_targets) == num_targets_to_reach:
             return back_track(current_position, agent_position, history)
 
         for next_step in _get_successors(game_state, current_position, current_targets, ghosts, neighbors, agent, ghost_influence_range, step_cost):
