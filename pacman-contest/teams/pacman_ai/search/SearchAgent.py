@@ -69,7 +69,7 @@ class SearchAgent(BasicAgent):
 
         agent_position = gameState.getAgentPosition(self.index)
         agent_food_packed = utility.get_agent_num_food_packed(gameState, self.index)
-        current_task = self.task_state.list[0]
+        current_task = self.task_state.list[-1]
         print(self.index, current_task)
 
         if current_task == OFFENSIVE_PREPARATION:
