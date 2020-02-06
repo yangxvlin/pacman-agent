@@ -186,7 +186,6 @@ def are_foods_in_same_cluster(food1, food2, game_state: GameState, agent: Captur
     :param cluster_radius: inclusive
     :return:
     """
-    foods_can_eat = agent.getFood(game_state)
 
     visited = set()
 
@@ -209,10 +208,24 @@ def are_foods_in_same_cluster(food1, food2, game_state: GameState, agent: Captur
                 continue
 
             x, y = neighbor
-            if foods_can_eat[x][y]:
+            if game_state.hasFood(x, y):
                 stack.push(neighbor)
 
     return False
+
+
+def is_adjacent_to_food(game_state: GameState, agent_position):
+    return get_adjacent_food(game_state, agent_position) != []
+
+
+def get_adjacent_food(game_state: GameState, agent_position):
+    foods = []
+
+    for pos in get_neighbor(agent_position):
+        x, y = pos
+        if game_state.hasFood(x, y):
+            foods.append(pos)
+    return foods
 
 
 def get_agent_num_food_packed(game_state: GameState, agent_index):
