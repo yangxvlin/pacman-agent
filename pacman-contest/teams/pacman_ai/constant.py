@@ -33,4 +33,7 @@ OFFENSIVE_PREPARATION = "offensive preparation"
 """ the state that the agent invade into opponent's side and eat food """
 OFFENSIVE = "offensive"
 
+""" the state that the agent return to the boundary to unpack food """
+RETURN = "return"
+
 # ******************************************************* hand coded decision tree state ends *****************************************************************
