@@ -40,6 +40,12 @@ class BasicAgent(OmniscientAgent):
     def chooseAction(self, gameState):
         util.raiseNotDefined()
 
+    def get_self_boundary(self):
+        if self.red:
+            return self.red_boundary
+        else:
+            return self.blue_boundary
+
 
 def dfs_dead_end_path(pos, dead_end_path, accumulator=0):
 
