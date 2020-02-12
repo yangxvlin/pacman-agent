@@ -52,6 +52,10 @@
 12. [lure pacman] wait and lure the pacman into the trap when defensing
 13. [change entrance (?)] when two ghosts got stuck, should our agent choose another entrance to attack?
     - I think just tie is a better choice, because the first to change can have disadvantages
+14. [food density] someone mentioned, but no idea how to calculate it
+15. [horizontal movement v.s. vertical movement] In defense, vertical movement won't push enemy towards its home. So it is better?
+    - https://www.youtube.com/watch?v=2qDmBawHfCo
+16. [collaborative defense] one ghost chase the pacman, the other one block the pacman in the other direction.
 
 ## possible features
 1. number of remaining food
