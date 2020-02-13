@@ -27,12 +27,59 @@
     - I can't understand this. And it seems comes together with deep learning. So not gonna try it.
 7. ~~Game Theoretic Methods~~
     - No idea about how this is related to this project. So not thinking about it currently.
+    - minimax & alpha-beta pruning ???
+    - ![](./docs/game_theory_analysis.png)
+        - https://www.youtube.com/watch?v=fEHBEeGk8SI ```3:33```
 
-## coding standards
+
+## possible improvement
+1. [trap detection] for food in dead end, agent decide to eat it when ```2*dist_to_food <= dist_to_ghost``` in order to avoid being captured
+2. when there is a food being eaten, we can use this information to infer the opponent's agent's position
+3. discourage 'reverse' and 'stop' action
+4. when using MCT, step size should be wisely dynamically determined (5 step because of visual range)
+    - too much will cause less simulation performed
+    - too little will be meaningless
+    - based on https://www.youtube.com/watch?v=Sk6GqeBFrUo ```6:30``` 200 simulation/1s round for 5-depth
+5. the timing to eat capsule is important
+    - ![](./docs/timing_layout.png)
+6. how to avoid agent doing stupid action back and forth (3. seems close to this idea)
+7. how to detect one or two ghosts are chasing the pacman
+    - because this can leads to the pacman to ```return_home``` or ```eat_capsule```
+8. [agents cooperation] two agents should move in different path to cooperate instead of doing the same action 
+9. [patrol defense] ghost patrol around key points to avoid pacman invade
+10. [pre-label] pre-label the positions (1. seems close to this idea)
+11. [smarter return] ```Return Reward Score = w * (# food carry / dist to home)```
+12. [lure pacman] wait and lure the pacman into the trap when defensing
+13. [change entrance (?)] when two ghosts got stuck, should our agent choose another entrance to attack?
+    - I think just tie is a better choice, because the first to change can have disadvantages
+14. [food density] someone mentioned, but no idea how to calculate it
+15. [horizontal movement v.s. vertical movement] In defense, vertical movement won't push enemy towards its home. So it is better?
+    - https://www.youtube.com/watch?v=2qDmBawHfCo
+16. [collaborative defense] one ghost chase the pacman, the other one block the pacman in the other direction.
+
+## possible features
+1. number of remaining food
+2. dist to closest food
+3. count of next step legal action
+4. dist to closest ghost
+5. dist to closest pacman
+6. dist to closest capsule
+7. whether go back home to unpack
+8. whether go back home to defense
+9. dist to home
+10. score
+
+ ## coding standards
 - pep8 but with 160 line length limit
+
+## past games
+1. https://people.eng.unimelb.edu.au/nlipovetzky/comp90054tournament/
+2. https://sites.google.com/view/pacman-capture-hall-fame/hall-of-fame?authuser=0
 
 ## my notes
 1. customize agent for team ```--delay 0.0 -r teams/team_heuristic_search/myTeam.py --redOpts=first=DummyAgent,second=DummyAgent -b teams/team_heuristic_search/myTeam.py```
+2. A distanceCalculator instance caches the maze distances between each pair of positions, so your agents can use:
+    ```self.distancer.getDistance(p1, p2)```
 
 ### --help
 ```

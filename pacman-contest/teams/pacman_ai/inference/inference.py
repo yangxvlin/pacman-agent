@@ -142,7 +142,7 @@ class InferenceModule:
             gameState = self.set_opponent_positions(gameState, pos)
         # print(gameState.data.agentStates[opponent_index])
 
-        self_positions = utility.get_agents_position(gameState, self.self_index)
+        self_positions = utility.get_agents_positions(gameState, self.self_index)
         opponent_position = pos# gameState.getAgentPosition(opponent_index)  # The position you set
         dist = DiscreteDistribution()
 
