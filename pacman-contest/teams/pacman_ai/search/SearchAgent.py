@@ -89,6 +89,7 @@ class SearchAgent(BasicAgent):
             # enough food packed, time to return
             if agent_food_packed >= self.food_pack_num:
                 # however still has chance to eat easy food, so try to eat it
+                # TODO this might cause death in dead end
                 if utility.is_adjacent_to_food(gameState, agent_position):
                     next_action = offensive_food_selection(gameState, self, agent_position, self.index)  # OFFENSIVE eat food
                     # no food can eat, RETURN
