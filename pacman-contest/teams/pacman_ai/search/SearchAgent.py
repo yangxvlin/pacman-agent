@@ -70,7 +70,9 @@ class SearchAgent(BasicAgent):
         agent_position = gameState.getAgentPosition(self.index)
         agent_food_packed = utility.get_agent_num_food_packed(gameState, self.index)
         current_task = self.task_state.list[-1]
-        print(self.index, current_task)
+        print(self.index, current_task, agent_position)
+        for opponent_index in self.getOpponents(gameState):
+            print(opponent_index, gameState.getAgentPosition(opponent_index))
 
         if current_task == OFFENSIVE_PREPARATION:
             # OFFENSIVE_PREPARATION not finished yet (i.e. not reach target nor becomes pacman)
@@ -177,7 +179,7 @@ def offensive_food_selection(game_state: GameState, agent: SearchAgent, agent_po
         # TODO some problems in this condition
         next_dist_to_food = agent.getMazeDistance(agent_next_position, food)
         if agent_next_position in agent.dead_end_path_length and food in agent.dead_end_path_length and \
-                dist_to_food + agent.dead_end_path_length[food] >= dist_to_closest_ghost and \
+                dist_to_food + agent.dead_end_path_length[food]+1 >= dist_to_closest_ghost and \
                 utility.is_in_the_same_dead_end_path(agent.dead_end_path, agent_next_position, food):
             continue
 
