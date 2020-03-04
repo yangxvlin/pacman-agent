@@ -76,6 +76,8 @@ def are_opponents_pacmans(game_state: GameState, agent_index):
 
 def get_opponents_ghosts_positions(game_state: GameState, agent_index):
     """
+    TODO also include ghost whose dist_to_agent <= scared time && scared time <= 2
+
     :param game_state:
     :param agent_index:
     :return dictionary of opponents ghosts position
