@@ -176,7 +176,8 @@ def offensive_food_selection(game_state: GameState, agent: SearchAgent, agent_po
         # food and agent in the same dead end path, danger to enter the dead end path if 2 * dist_to_food >= dist_to_closest_ghost
         # TODO some problems in this condition
         next_dist_to_food = agent.getMazeDistance(agent_next_position, food)
-        if agent_next_position in agent.dead_end_path_length and food in agent.dead_end_path_length and 2 * dist_to_food > dist_to_closest_ghost-1 and \
+        if agent_next_position in agent.dead_end_path_length and food in agent.dead_end_path_length and \
+                dist_to_food + agent.dead_end_path_length[food] >= dist_to_closest_ghost and \
                 utility.is_in_the_same_dead_end_path(agent.dead_end_path, agent_next_position, food):
             continue
 
@@ -201,11 +202,12 @@ def return_path_selection_pure_fabric(game_state: GameState, agent: SearchAgent,
 def return_path_selection(game_state: GameState, agent: SearchAgent, agent_position, agent_index, boundary):
     # no food selection, so food not targeted
     agent.FOOD_TARGET[agent_index] = None
+    ghosts_positions = utility.get_opponents_ghosts_positions(game_state, agent_index)
 
     return_to_boundary_path = a_star_path(game_state,
                                           agent_position,
                                           boundary,
-                                          utility.get_opponents_ghosts_positions(game_state, agent_index),
+                                          ghosts_positions,
                                           agent.neighbors,
                                           agent,
                                           1,
@@ -222,7 +224,7 @@ def return_path_selection(game_state: GameState, agent: SearchAgent, agent_posit
         eat_capsule_path = a_star_path(game_state,
                                        agent_position,
                                        capsules,
-                                       utility.get_opponents_ghosts_positions(game_state, agent_index),
+                                       ghosts_positions,
                                        agent.neighbors,
                                        agent,
                                        1,
@@ -232,6 +234,7 @@ def return_path_selection(game_state: GameState, agent: SearchAgent, agent_posit
             return eat_capsule_path[0]
 
     # TODO no path to return or eat capsule so just leave as far as pacman can from ghosts
+    print("no path to return " + str(agent_position))
     return Directions.STOP
 
 
