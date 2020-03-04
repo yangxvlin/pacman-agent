@@ -90,16 +90,37 @@ def get_opponents_ghosts_positions(game_state: GameState, agent_index):
 
 
 def get_opponents_ghosts_min_dist(game_state: GameState, agent_index, agent: CaptureAgent, agent_position):
+    """
+    :param game_state:
+    :param agent_index:
+    :param agent:
+    :param agent_position:
+    :return: player's agent's distance to the closest ghosts, POSITIVE_INFINITY if no ghosts
+             also add additional 1 for moving sequence advantage (move before enables to flee away)
+    """
     opponents_ghosts_positions = get_opponents_ghosts_positions(game_state, agent_index)
 
     min_dist = POSITIVE_INFINITY
 
     for agent_ghost_index, ghost_position in opponents_ghosts_positions.items():
-        dist = agent.getMazeDistance(agent_position, ghost_position)
+        dist = agent.getMazeDistance(agent_position, ghost_position) + get_moving_advantage(agent_index, agent_ghost_index)
         if not is_agent_scared(game_state, agent_ghost_index) and dist < min_dist:
             min_dist = dist
 
     return min_dist
+
+
+def get_moving_advantage(agent_index, ghost_index):
+    """
+    :param agent_index:
+    :param ghost_index:
+    :return: agent move before ghost will have a default distance
+    """
+    assert agent_index != ghost_index
+    if ghost_index > agent_index:
+        return 1
+    else:
+        return -1
 
 
 def get_opponents_agent_num(game_state: GameState, agent_index):
