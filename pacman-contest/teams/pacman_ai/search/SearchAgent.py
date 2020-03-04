@@ -89,31 +89,34 @@ class SearchAgent(BasicAgent):
             # enough food packed, time to return
             if agent_food_packed >= self.food_pack_num:
                 # however still has chance to eat easy food, so try to eat it
-                # TODO this might cause death in dead end
-                if utility.is_adjacent_to_food(gameState, agent_position):
-                    next_action = offensive_food_selection(gameState, self, agent_position, self.index)  # OFFENSIVE eat food
-                    # no food can eat, RETURN
-                    if not next_action:
-                        self.task_state.push(RETURN)
-                        return return_path_selection_pure_fabric(gameState, self, agent_position, self.index, self.get_self_boundary())
-
-                    adj_foods = utility.get_adjacent_food(gameState, agent_position)
-                    next_position = utility.get_action_result(agent_position, next_action)
-
-                    # goes to eat additional food
-                    if next_position in adj_foods:
-                        self.food_pack_num += 1
-                        return next_action
-
-                    # not eating the adj_foods, so RETURN
-                    else:
-                        self.task_state.push(RETURN)
-                        return return_path_selection_pure_fabric(gameState, self, agent_position, self.index, self.get_self_boundary())
-
+                # continue to eat adjacent food might cause death, so give up this strategy currently
+                # if utility.is_adjacent_to_food(gameState, agent_position):
+                #     next_action = offensive_food_selection(gameState, self, agent_position, self.index)  # OFFENSIVE eat food
+                #     # no food can eat, RETURN
+                #     if not next_action:
+                #         self.task_state.push(RETURN)
+                #         return return_path_selection_pure_fabric(gameState, self, agent_position, self.index, self.get_self_boundary())
+                #
+                #     adj_foods = utility.get_adjacent_food(gameState, agent_position)
+                #     next_position = utility.get_action_result(agent_position, next_action)
+                #
+                #     # goes to eat additional food
+                #     if next_position in adj_foods:
+                #         self.food_pack_num += 1
+                #         return next_action
+                #
+                #     # not eating the adj_foods, so RETURN
+                #     else:
+                #         self.task_state.push(RETURN)
+                #         return return_path_selection_pure_fabric(gameState, self, agent_position, self.index, self.get_self_boundary())
+                #
                 # find a path to RETURN
-                else:
-                    self.task_state.push(RETURN)
-                    return return_path_selection_pure_fabric(gameState, self, agent_position, self.index, self.get_self_boundary())
+                # else:
+                #     self.task_state.push(RETURN)
+                #     return return_path_selection_pure_fabric(gameState, self, agent_position, self.index, self.get_self_boundary())
+
+                self.task_state.push(RETURN)
+                return return_path_selection_pure_fabric(gameState, self, agent_position, self.index, self.get_self_boundary())
 
             # try to eat food
             if not next_action:
