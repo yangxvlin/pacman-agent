@@ -5,7 +5,7 @@ Date:        2020-1-16 14:48:56
 Description: contains agent for "Heuristic Search Algorithms (using general or pacman specific heuristic functions)"
 """
 
-from teams.pacman_ai.BasicAgent import BasicAgent
+from teams.pacman_ai.BasicAgent import BasicAgent, dead_end_path_length_calculation
 import teams.pacman_ai.utility as utility
 from teams.pacman_ai.constant import POSITIVE_INFINITY, OFFENSIVE_PREPARATION, OFFENSIVE, RETURN, DEFAULT_FOOD_PACK_NUM
 import random
@@ -60,9 +60,13 @@ class SearchAgent(BasicAgent):
         '''
         You should change this in your own agent.
         '''
+        # dynamic dead end calculation
+        self.dead_end_path = utility.calculate_dead_end(self.all_movable, self.neighbors, utility.get_opponents_ghosts_positions(gameState, self.index).values(), True)
+        self.dead_end_path_length = dead_end_path_length_calculation(self.dead_end_path)
+
         # code to test dead end calculation
-        # dist = Counter({key: 1 for key in self.dead_end_path})
-        # self.displayDistributionsOverPositions([dist])
+        dist = Counter({key: 1 for key in self.dead_end_path})
+        self.displayDistributionsOverPositions([dist])
 
         # code to test initial offensive target
         # print(self.index, self.INITIAL_TARGET[self.index], self.INITIAL_TARGET)

@@ -256,22 +256,30 @@ def get_agent_num_food_packed(game_state: GameState, agent_index):
 
 
 # ****************************************** dead end calculation start ***************************************************************************************
-def calculate_dead_end(movable_list, neighbors):
+def calculate_dead_end(movable_list, neighbors, ghosts_positions=[], are_ghosts_treated_as_wall=False):
     """
+    :param ghosts_positions:
+    :param are_ghosts_treated_as_wall:
     :param movable_list:
     :param neighbors:
     :return: {location: position to move to location} of a series of location in dead_ends
     """
     parent = {}  # parent means the dead end location (key) move from the parent[key] (value)
     stack = Stack()
-    dead_ends = calculate_location_with_given_number_of_walls(movable_list, 3, neighbors)
+    dead_ends = calculate_location_with_given_number_of_walls(movable_list, 3, neighbors, ghosts_positions, are_ghosts_treated_as_wall)
     for dead_end in dead_ends:
+        # this dead end is one the path of a deeper dead end, so skip it
+        if dead_end in parent:
+            continue
+
         parent[dead_end] = None
 
         stack.push(dead_end)
         while not stack.isEmpty():
             loc = stack.pop()
             loc_neighbors = neighbors[loc]
+            if are_ghosts_treated_as_wall:
+                loc_neighbors = list(filter(lambda x: x not in ghosts_positions, loc_neighbors))
 
             loc_neighbors_not_in_parent = list(filter(lambda x: x not in parent, loc_neighbors))
 
@@ -283,16 +291,23 @@ def calculate_dead_end(movable_list, neighbors):
     return parent
 
 
-def calculate_location_with_given_number_of_walls(all_locations, num_walls, neighbors):
+def calculate_location_with_given_number_of_walls(all_locations, num_walls, neighbors, ghosts_positions, are_ghosts_treated_as_wall):
     """
     :param all_locations:
     :param num_walls:
+    :param ghosts_positions:
+    :param are_ghosts_treated_as_wall:
     :param neighbors: {position: [neighbor_position]}
-    :return: location surrounded with given num_walls
+    :return: location surrounded with given num_walls if are_ghosts_treated_as_wall then ghosts are wall too
     """
     res = []
     for location in all_locations:
-        if len(neighbors[location]) == NUM_DIRECTIONS - num_walls:
+        if are_ghosts_treated_as_wall:
+            num_neighbor = len(list(filter(lambda x: x not in ghosts_positions, neighbors[location])))
+        else:
+            num_neighbor = len(neighbors[location])
+
+        if num_neighbor == NUM_DIRECTIONS - num_walls:
             res.append(location)
     return res
 
